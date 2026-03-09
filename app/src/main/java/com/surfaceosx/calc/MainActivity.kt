@@ -1,409 +1,280 @@
-package com.surfaceosx.calc  // замените на свой пакет
+package com.surfaceosx.calc
 
 import android.os.Bundle
-import android.view.View
-import android.widget.*
+import android.view.MenuItem
+import android.widget.Button
+import android.widget.ImageButton
+import android.widget.PopupMenu
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.tabs.TabLayout
-import kotlin.math.*
+import kotlin.math.sqrt
 
 class MainActivity : AppCompatActivity() {
 
-    // UI элементы
-    private lateinit var textViewResult: TextView
-    private lateinit var tabLayout: TabLayout
-    private lateinit var panelStandard: LinearLayout
-    private lateinit var panelScientific: LinearLayout
-    private lateinit var panelProgrammer: LinearLayout
-    private lateinit var panelConverter: LinearLayout
+    private lateinit var tvResult: TextView
+    private lateinit var tvMode: TextView  // можно использовать для отображения "обычный"
 
-    // Для стандартного и научного режимов
-    private var operand1: Double? = null
-    private var operator: String? = null
-    private var newNumber = true
+    private var operand1: Double = 0.0
+    private var operand2: Double = 0.0
+    private var operator: String = ""
+    private var isNewOperation = true
+    private var isDecimalPressed = false
 
-    // Для памяти
-    private var memoryValue: Double = 0.0
-
-    // Для конвертера
-    private lateinit var spinnerCategory: Spinner
-    private lateinit var editFrom: EditText
-    private lateinit var spinnerFromUnit: Spinner
-    private lateinit var editTo: EditText
-    private lateinit var spinnerToUnit: Spinner
+    // Переменная для памяти
+    private var memory: Double = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Инициализация виджетов
-        textViewResult = findViewById(R.id.textViewResult)
-        tabLayout = findViewById(R.id.tabLayout)
-        panelStandard = findViewById(R.id.panelStandard)
-        panelScientific = findViewById(R.id.panelScientific)
-        panelProgrammer = findViewById(R.id.panelProgrammer)
-        panelConverter = findViewById(R.id.panelConverter)
+        tvResult = findViewById(R.id.tvResult)
+        tvMode = findViewById(R.id.tvMode)
 
-        // Переключение режимов
-        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                when (tab?.position) {
-                    0 -> {
-                        panelStandard.visibility = View.VISIBLE
-                        panelScientific.visibility = View.GONE
-                        panelProgrammer.visibility = View.GONE
-                        panelConverter.visibility = View.GONE
+        // Кнопка меню
+        findViewById<ImageButton>(R.id.btnMenu).setOnClickListener { view ->
+            val popup = PopupMenu(this, view)
+            popup.menuInflater.inflate(R.menu.mode_menu, popup.menu)
+            popup.setOnMenuItemClickListener { item: MenuItem ->
+                when (item.itemId) {
+                    R.id.mode_standard -> {
+                        tvMode.text = "обычный"
+                        // Здесь можно будет переключить видимость кнопок
                     }
-                    1 -> {
-                        panelStandard.visibility = View.GONE
-                        panelScientific.visibility = View.VISIBLE
-                        panelProgrammer.visibility = View.GONE
-                        panelConverter.visibility = View.GONE
-                    }
-                    2 -> {
-                        panelStandard.visibility = View.GONE
-                        panelScientific.visibility = View.GONE
-                        panelProgrammer.visibility = View.VISIBLE
-                        panelConverter.visibility = View.GONE
-                    }
-                    3 -> {
-                        panelStandard.visibility = View.GONE
-                        panelScientific.visibility = View.GONE
-                        panelProgrammer.visibility = View.GONE
-                        panelConverter.visibility = View.VISIBLE
+                    R.id.mode_scientific -> {
+                        tvMode.text = "инженерный"
+                        Toast.makeText(this, "Инженерный режим в разработке", Toast.LENGTH_SHORT).show()
                     }
                 }
+                true
             }
+            popup.show()
+        }
 
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
-        })
-
-        // Инициализация всех режимов
-        initStandardMode()
-        initScientificMode()
-        initConverterMode()
+        setNumberButtonListeners()
+        setOperatorButtonListeners()
+        setMemoryButtonListeners()
+        setFunctionButtonListeners()
+        setControlButtonListeners()
     }
 
-    // ---------- Standard Mode ----------
-    private fun initStandardMode() {
+    private fun setNumberButtonListeners() {
         val numberIds = listOf(
-            R.id.button0, R.id.button1, R.id.button2, R.id.button3,
-            R.id.button4, R.id.button5, R.id.button6, R.id.button7,
-            R.id.button8, R.id.button9
+            R.id.btn0, R.id.btn1, R.id.btn2, R.id.btn3, R.id.btn4,
+            R.id.btn5, R.id.btn6, R.id.btn7, R.id.btn8, R.id.btn9
         )
         numberIds.forEach { id ->
-            findViewById<Button>(id).setOnClickListener { numberClick(it) }
+            findViewById<Button>(id).setOnClickListener {
+                onNumberClick(it as Button)
+            }
         }
-
-        findViewById<Button>(R.id.buttonPlus).setOnClickListener { operatorClick("+") }
-        findViewById<Button>(R.id.buttonMinus).setOnClickListener { operatorClick("-") }
-        findViewById<Button>(R.id.buttonMultiply).setOnClickListener { operatorClick("*") }
-        findViewById<Button>(R.id.buttonDivide).setOnClickListener { operatorClick("/") }
-        findViewById<Button>(R.id.buttonEquals).setOnClickListener { equalsClick() }
-        findViewById<Button>(R.id.buttonClear).setOnClickListener { clearClick() }
-        findViewById<Button>(R.id.buttonPlusMinus).setOnClickListener { plusMinusClick() }
-        findViewById<Button>(R.id.buttonPercent).setOnClickListener { percentClick() }
-        findViewById<Button>(R.id.buttonDot).setOnClickListener { dotClick() }
     }
 
-    private fun numberClick(view: View) {
-        val button = view as Button
+    private fun setOperatorButtonListeners() {
+        val operatorIds = listOf(
+            R.id.btnAdd, R.id.btnSubtract, R.id.btnMultiply, R.id.btnDivide
+        )
+        operatorIds.forEach { id ->
+            findViewById<Button>(id).setOnClickListener {
+                onOperatorClick(it as Button)
+            }
+        }
+
+        findViewById<Button>(R.id.btnEquals).setOnClickListener {
+            onEqualsClick()
+        }
+    }
+
+    private fun setMemoryButtonListeners() {
+        findViewById<Button>(R.id.btnMC).setOnClickListener { memory = 0.0 }
+        findViewById<Button>(R.id.btnMR).setOnClickListener {
+            tvResult.text = formatNumber(memory)
+            isNewOperation = true
+            isDecimalPressed = memory.toString().contains(".")
+        }
+        findViewById<Button>(R.id.btnMPlus).setOnClickListener {
+            memory += currentValue()
+        }
+        findViewById<Button>(R.id.btnMMinus).setOnClickListener {
+            memory -= currentValue()
+        }
+        findViewById<Button>(R.id.btnMS).setOnClickListener {
+            memory = currentValue()
+        }
+        findViewById<Button>(R.id.btnMTriangle).setOnClickListener {
+            Toast.makeText(this, "Память: ${formatNumber(memory)}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun setFunctionButtonListeners() {
+        findViewById<Button>(R.id.btnPercent).setOnClickListener {
+            applyUnaryOperation { it / 100 }
+        }
+        findViewById<Button>(R.id.btnSqrt).setOnClickListener {
+            applyUnaryOperation { sqrt(it) }
+        }
+        findViewById<Button>(R.id.btnSquare).setOnClickListener {
+            applyUnaryOperation { it * it }
+        }
+        findViewById<Button>(R.id.btnReciprocal).setOnClickListener {
+            if (currentValue() == 0.0) {
+                tvResult.text = "Ошибка"
+                return@setOnClickListener
+            }
+            applyUnaryOperation { 1 / it }
+        }
+    }
+
+    private fun setControlButtonListeners() {
+        findViewById<Button>(R.id.btnClear).setOnClickListener { onClearClick() }
+        findViewById<Button>(R.id.btnCE).setOnClickListener { onCEClick() }
+        findViewById<Button>(R.id.btnBackspace).setOnClickListener { onBackspaceClick() }
+        findViewById<Button>(R.id.btnSign).setOnClickListener { onSignClick() }
+        findViewById<Button>(R.id.btnDot).setOnClickListener { onDotClick() }
+    }
+
+    // Получить текущее значение с дисплея
+    private fun currentValue(): Double {
+        return tvResult.text.toString().toDoubleOrNull() ?: 0.0
+    }
+
+    // Применить унарную операцию (%, √, x², 1/x)
+    private fun applyUnaryOperation(operation: (Double) -> Double) {
+        val value = currentValue()
+        val result = operation(value)
+        tvResult.text = formatNumber(result)
+        isNewOperation = true // после унарной операции можно начинать новое число
+        isDecimalPressed = result.toString().contains(".")
+    }
+
+    // Форматирование числа: убираем .0 если целое
+    private fun formatNumber(value: Double): String {
+        return if (value == value.toLong().toDouble()) {
+            value.toLong().toString()
+        } else {
+            value.toString()
+        }
+    }
+
+    private fun onNumberClick(button: Button) {
         val digit = button.text.toString()
-        val currentText = textViewResult.text.toString()
+        val currentText = tvResult.text.toString()
 
-        if (newNumber) {
-            textViewResult.text = digit
-            newNumber = false
-        } else {
-            textViewResult.text = currentText + digit
-        }
-    }
-
-    private fun operatorClick(op: String) {
-        val currentText = textViewResult.text.toString()
-        if (!newNumber) {
-            operand1 = currentText.toDoubleOrNull()
-            operator = op
-            newNumber = true
-        } else {
-            operator = op
-        }
-    }
-
-    private fun equalsClick() {
-        val operand2 = textViewResult.text.toString().toDoubleOrNull()
-        if (operand1 != null && operand2 != null && operator != null) {
-            val result = when (operator) {
-                "+" -> operand1!! + operand2
-                "-" -> operand1!! - operand2
-                "*" -> operand1!! * operand2
-                "/" -> if (operand2 != 0.0) operand1!! / operand2 else Double.NaN
-                "^" -> operand1!!.pow(operand2)
-                "root" -> operand2.pow(1.0 / operand1!!) // y√x: operand1 = степень, operand2 = число
-                else -> 0.0
+        when {
+            isNewOperation -> {
+                tvResult.text = if (digit == ",") "0." else digit
+                isNewOperation = false
             }
-            textViewResult.text = result.toString()
-            operand1 = result
-            operator = null
-            newNumber = true
-        }
-    }
-
-    private fun clearClick() {
-        textViewResult.text = "0"
-        operand1 = null
-        operator = null
-        newNumber = true
-    }
-
-    private fun plusMinusClick() {
-        val current = textViewResult.text.toString().toDoubleOrNull()
-        if (current != null) {
-            textViewResult.text = (-current).toString()
-        }
-    }
-
-    private fun percentClick() {
-        val current = textViewResult.text.toString().toDoubleOrNull()
-        if (current != null && operand1 != null) {
-            val percentValue = operand1!! * current / 100
-            textViewResult.text = percentValue.toString()
-            newNumber = true
-        } else {
-            textViewResult.text = (current?.div(100))?.toString() ?: "0"
-        }
-    }
-
-    private fun dotClick() {
-        val currentText = textViewResult.text.toString()
-        if (!currentText.contains(".")) {
-            textViewResult.text = "$currentText."
-            newNumber = false
-        }
-    }
-
-    // ---------- Scientific Mode ----------
-    private fun initScientificMode() {
-        // Унарные функции
-        findViewById<Button>(R.id.buttonSin).setOnClickListener { applyFunction("sin") }
-        findViewById<Button>(R.id.buttonCos).setOnClickListener { applyFunction("cos") }
-        findViewById<Button>(R.id.buttonTan).setOnClickListener { applyFunction("tan") }
-        findViewById<Button>(R.id.buttonSinh).setOnClickListener { applyFunction("sinh") }
-        findViewById<Button>(R.id.buttonCosh).setOnClickListener { applyFunction("cosh") }
-        findViewById<Button>(R.id.buttonTanh).setOnClickListener { applyFunction("tanh") }
-
-        findViewById<Button>(R.id.buttonLn).setOnClickListener { applyFunction("ln") }
-        findViewById<Button>(R.id.buttonLog).setOnClickListener { applyFunction("log") }
-
-        findViewById<Button>(R.id.buttonSquare).setOnClickListener { applyFunction("square") }
-        findViewById<Button>(R.id.buttonCube).setOnClickListener { applyFunction("cube") }
-        findViewById<Button>(R.id.buttonInverse).setOnClickListener { applyFunction("inverse") }
-        findViewById<Button>(R.id.buttonSqrt).setOnClickListener { applyFunction("sqrt") }
-        findViewById<Button>(R.id.buttonCbrt).setOnClickListener { applyFunction("cbrt") }
-        findViewById<Button>(R.id.buttonFactorial).setOnClickListener { applyFunction("factorial") }
-
-        findViewById<Button>(R.id.buttonExp).setOnClickListener { applyFunction("exp") }
-        findViewById<Button>(R.id.buttonTenPower).setOnClickListener { applyFunction("tenPow") }
-
-        // Бинарные операторы
-        findViewById<Button>(R.id.buttonPowerY).setOnClickListener { operatorClick("^") }
-        findViewById<Button>(R.id.buttonYRootX).setOnClickListener { operatorClick("root") }
-
-        // Константы
-        findViewById<Button>(R.id.buttonPi).setOnClickListener { insertConstant("π") }
-        findViewById<Button>(R.id.buttonE).setOnClickListener { insertConstant("e") }
-
-        // Память
-        findViewById<Button>(R.id.buttonMC).setOnClickListener { memoryClear() }
-        findViewById<Button>(R.id.buttonMR).setOnClickListener { memoryRecall() }
-        findViewById<Button>(R.id.buttonMPlus).setOnClickListener { memoryAdd() }
-        findViewById<Button>(R.id.buttonMMinus).setOnClickListener { memorySubtract() }
-
-        // Заглушки для скобок и 2nd
-        findViewById<Button>(R.id.button2nd).setOnClickListener {
-            Toast.makeText(this, "2nd function not implemented", Toast.LENGTH_SHORT).show()
-        }
-        findViewById<Button>(R.id.buttonLeftParen).setOnClickListener {
-            Toast.makeText(this, "( not implemented", Toast.LENGTH_SHORT).show()
-        }
-        findViewById<Button>(R.id.buttonRightParen).setOnClickListener {
-            Toast.makeText(this, ") not implemented", Toast.LENGTH_SHORT).show()
-        }
-        findViewById<Button>(R.id.buttonLeftParen2).setOnClickListener {
-            Toast.makeText(this, "( not implemented", Toast.LENGTH_SHORT).show()
-        }
-        findViewById<Button>(R.id.buttonRightParen2).setOnClickListener {
-            Toast.makeText(this, ") not implemented", Toast.LENGTH_SHORT).show()
-        }
-        findViewById<Button>(R.id.buttonEE).setOnClickListener {
-            Toast.makeText(this, "EE not implemented", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun applyFunction(func: String) {
-        val current = textViewResult.text.toString().toDoubleOrNull()
-        if (current != null) {
-            val result = when (func) {
-                "sin" -> sin(current)
-                "cos" -> cos(current)
-                "tan" -> tan(current)
-                "sinh" -> sinh(current)
-                "cosh" -> cosh(current)
-                "tanh" -> tanh(current)
-                "ln" -> ln(current)
-                "log" -> log10(current)
-                "square" -> current * current
-                "cube" -> current * current * current
-                "inverse" -> 1.0 / current
-                "sqrt" -> sqrt(current)
-                "cbrt" -> cbrt(current)
-                "factorial" -> factorial(current.toLong()).toDouble()
-                "exp" -> exp(current)
-                "tenPow" -> 10.0.pow(current)
-                else -> current
+            currentText == "0" && digit != "," -> {
+                tvResult.text = digit
             }
-            textViewResult.text = result.toString()
-            newNumber = true
+            else -> {
+                tvResult.append(if (digit == ",") "." else digit)
+            }
         }
+        isDecimalPressed = tvResult.text.contains(".")
     }
 
-    private fun factorial(n: Long): Long {
-        return if (n <= 1) 1 else n * factorial(n - 1)
-    }
+    private fun onOperatorClick(button: Button) {
+        val currentText = tvResult.text.toString()
+        if (currentText.isEmpty()) return
 
-    private fun insertConstant(constant: String) {
-        val value = when (constant) {
-            "π" -> PI
-            "e" -> E
-            else -> 0.0
-        }
-        if (newNumber) {
-            textViewResult.text = value.toString()
-            newNumber = false
+        // Если уже есть оператор, вычисляем промежуточный результат
+        if (operator.isNotEmpty() && !isNewOperation) {
+            operand2 = currentText.toDouble()
+            compute()
         } else {
-            textViewResult.text = textViewResult.text.toString() + value.toString()
+            operand1 = currentText.toDouble()
         }
-    }
 
-    // ---------- Memory Functions ----------
-    private fun memoryClear() {
-        memoryValue = 0.0
-        Toast.makeText(this, "Memory cleared", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun memoryRecall() {
-        textViewResult.text = memoryValue.toString()
-        newNumber = true
-    }
-
-    private fun memoryAdd() {
-        val current = textViewResult.text.toString().toDoubleOrNull()
-        if (current != null) {
-            memoryValue += current
+        operator = when (button.id) {
+            R.id.btnAdd -> "+"
+            R.id.btnSubtract -> "-"
+            R.id.btnMultiply -> "×"
+            R.id.btnDivide -> "/"
+            else -> ""
         }
+        isNewOperation = true
+        isDecimalPressed = false
     }
 
-    private fun memorySubtract() {
-        val current = textViewResult.text.toString().toDoubleOrNull()
-        if (current != null) {
-            memoryValue -= current
-        }
+    private fun onEqualsClick() {
+        val currentText = tvResult.text.toString()
+        if (operator.isEmpty() || currentText.isEmpty()) return
+
+        operand2 = currentText.toDouble()
+        compute()
+        operator = ""
     }
 
-    // ---------- Converter Mode ----------
-    private fun initConverterMode() {
-        spinnerCategory = findViewById(R.id.spinnerCategory)
-        editFrom = findViewById(R.id.editFrom)
-        spinnerFromUnit = findViewById(R.id.spinnerFromUnit)
-        editTo = findViewById(R.id.editTo)
-        spinnerToUnit = findViewById(R.id.spinnerToUnit)
-
-        spinnerCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val unitsArray = when (position) {
-                    0 -> R.array.length_units
-                    1 -> R.array.weight_units
-                    2 -> R.array.temperature_units
-                    else -> R.array.length_units
+    private fun compute() {
+        val result = when (operator) {
+            "+" -> operand1 + operand2
+            "-" -> operand1 - operand2
+            "×" -> operand1 * operand2
+            "/" -> {
+                if (operand2 == 0.0) {
+                    tvResult.text = "Ошибка"
+                    return
+                } else {
+                    operand1 / operand2
                 }
-                val adapter = ArrayAdapter.createFromResource(
-                    this@MainActivity,
-                    unitsArray,
-                    android.R.layout.simple_spinner_item
-                )
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                spinnerFromUnit.adapter = adapter
-                spinnerToUnit.adapter = adapter
-                convert()
             }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
+            else -> operand2
         }
-
-        editFrom.addTextChangedListener(object : android.text.TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: android.text.Editable?) {
-                convert()
-            }
-        })
-
-        spinnerFromUnit.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                convert()
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-
-        spinnerToUnit.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                convert()
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
+        tvResult.text = formatNumber(result)
+        operand1 = result
+        isNewOperation = true
     }
 
-    private fun convert() {
-        val fromValue = editFrom.text.toString().toDoubleOrNull() ?: 0.0
-        val category = spinnerCategory.selectedItemPosition
-        val fromUnit = spinnerFromUnit.selectedItemPosition
-        val toUnit = spinnerToUnit.selectedItemPosition
-
-        val result = when (category) {
-            0 -> convertLength(fromValue, fromUnit, toUnit)
-            1 -> convertWeight(fromValue, fromUnit, toUnit)
-            2 -> convertTemperature(fromValue, fromUnit, toUnit)
-            else -> 0.0
-        }
-        editTo.setText(result.toString())
+    private fun onClearClick() {
+        tvResult.text = "0"
+        operand1 = 0.0
+        operand2 = 0.0
+        operator = ""
+        isNewOperation = true
+        isDecimalPressed = false
     }
 
-    private fun convertLength(value: Double, from: Int, to: Int): Double {
-        val factors = doubleArrayOf(1.0, 1000.0, 1609.34) // meters, km, miles
-        val valueInMeters = value * factors[from]
-        return valueInMeters / factors[to]
+    private fun onCEClick() {
+        // Clear Entry: сбрасывает только текущее число
+        tvResult.text = "0"
+        isNewOperation = true
+        isDecimalPressed = false
     }
 
-    private fun convertWeight(value: Double, from: Int, to: Int): Double {
-        val factors = doubleArrayOf(1.0, 0.001, 0.453592) // kg, g, lb (в kg)
-        val valueInKg = value * factors[from]
-        return valueInKg / factors[to]
+    private fun onBackspaceClick() {
+        val text = tvResult.text.toString()
+        if (text.length > 1) {
+            val newText = text.dropLast(1)
+            tvResult.text = newText
+            // Если после удаления остался только минус (для отрицательных), превращаем в 0
+            if (newText == "-") {
+                tvResult.text = "0"
+            }
+        } else {
+            tvResult.text = "0"
+        }
+        isDecimalPressed = tvResult.text.contains(".")
     }
 
-    private fun convertTemperature(value: Double, from: Int, to: Int): Double {
-        // Все в Celsius, потом в целевую
-        val inCelsius = when (from) {
-            0 -> value                 // Celsius
-            1 -> (value - 32) * 5.0/9.0 // Fahrenheit
-            2 -> value - 273.15         // Kelvin
-            else -> value
+    private fun onSignClick() {
+        val value = currentValue()
+        val newValue = -value
+        tvResult.text = formatNumber(newValue)
+        isDecimalPressed = newValue.toString().contains(".")
+    }
+
+    private fun onDotClick() {
+        if (isDecimalPressed) return
+
+        val currentText = tvResult.text.toString()
+        if (isNewOperation) {
+            tvResult.text = "0."
+            isNewOperation = false
+        } else {
+            tvResult.append(".")
         }
-        return when (to) {
-            0 -> inCelsius
-            1 -> inCelsius * 9.0/5.0 + 32
-            2 -> inCelsius + 273.15
-            else -> inCelsius
-        }
+        isDecimalPressed = true
     }
 }

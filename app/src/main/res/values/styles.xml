@@ -1,34 +1,32 @@
 <resources>
-    <!-- Базовая тема приложения (наследуется от MaterialComponents) -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">#FF0078D7</item>
-        <item name="colorPrimaryVariant">#FF0053A0</item>
-        <item name="colorOnPrimary">#FFFFFFFF</item>
-        <item name="colorSecondary">#FF0078D7</item>
-        <item name="android:windowBackground">#FF1A1A1A</item>
+    <!-- Базовая тема приложения -->
+    <style name="Theme.WP10Calculator" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#000000</item>
     </style>
 
-    <!-- Базовый стиль для всех кнопок калькулятора -->
-    <style name="WP10ButtonBase" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+    <!-- Базовый стиль для всех кнопок -->
+    <style name="WP10BaseButton" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:textColor">#ffffff</item>
         <item name="android:textSize">20sp</item>
-        <item name="android:textColor">#FFFFFF</item>
-        <item name="android:background">@drawable/button_bg</item>
+        <item name="android:gravity">center</item>
+        <item name="android:focusable">true</item>
+        <item name="android:clickable">true</item>
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
-        <item name="android:stateListAnimator">@null</item>
-        <item name="rippleColor">#33FFFFFF</item>
-        <!-- Запрещаем автоматические минимальные размеры Material -->
-        <item name="android:minWidth">0dp</item>
-        <item name="android:minHeight">0dp</item>
+        <item name="android:padding">0dp</item>
+        <!-- Отключаем подкраску фона -->
+        <item name="android:backgroundTint">@null</item>
     </style>
 
-    <!-- Стиль для цифровых кнопок (тёмно-серый фон) -->
-    <style name="WP10DigitButton" parent="WP10ButtonBase">
-        <item name="android:background">@drawable/button_digit_bg</item>
+    <!-- Кнопки верхней части (память, функции) - чёрные -->
+    <style name="WP10TopButton" parent="WP10BaseButton">
+        <item name="android:background">#1A1A1A</item>
     </style>
 
-    <!-- Стиль для кнопок операций (синий/оранжевый фон) -->
-    <style name="WP10OperatorButton" parent="WP10ButtonBase">
-        <item name="android:background">@drawable/button_operator_bg</item>
+    <!-- Цифровые кнопки и операторы - светло-серые -->
+    <style name="WP10DigitButton" parent="WP10BaseButton">
+        <item name="android:background">#3a3a3a</item>
     </style>
 </resources>
