@@ -1,12 +1,11 @@
-package com.surfaceosx.calc
+package com.surfaceosx.calc  // замените на свой пакет
 
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
+import kotlin.math.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -18,10 +17,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var panelProgrammer: LinearLayout
     private lateinit var panelConverter: LinearLayout
 
-    // Для стандартного режима
+    // Для стандартного и научного режимов
     private var operand1: Double? = null
     private var operator: String? = null
     private var newNumber = true
+
+    // Для памяти
+    private var memoryValue: Double = 0.0
 
     // Для конвертера
     private lateinit var spinnerCategory: Spinner
@@ -77,19 +79,14 @@ class MainActivity : AppCompatActivity() {
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
 
-        // Инициализация обработчиков для стандартного режима
+        // Инициализация всех режимов
         initStandardMode()
-
-        // Инициализация конвертера
-        initConverterMode()
-
-        // Здесь можно добавить инициализацию научного и программистского режимов,
         initScientificMode()
-        // когда будут добавлены кнопки.
+        initConverterMode()
     }
 
+    // ---------- Standard Mode ----------
     private fun initStandardMode() {
-        // Цифры
         val numberIds = listOf(
             R.id.button0, R.id.button1, R.id.button2, R.id.button3,
             R.id.button4, R.id.button5, R.id.button6, R.id.button7,
@@ -99,7 +96,6 @@ class MainActivity : AppCompatActivity() {
             findViewById<Button>(id).setOnClickListener { numberClick(it) }
         }
 
-        // Операторы
         findViewById<Button>(R.id.buttonPlus).setOnClickListener { operatorClick("+") }
         findViewById<Button>(R.id.buttonMinus).setOnClickListener { operatorClick("-") }
         findViewById<Button>(R.id.buttonMultiply).setOnClickListener { operatorClick("*") }
@@ -143,6 +139,8 @@ class MainActivity : AppCompatActivity() {
                 "-" -> operand1!! - operand2
                 "*" -> operand1!! * operand2
                 "/" -> if (operand2 != 0.0) operand1!! / operand2 else Double.NaN
+                "^" -> operand1!!.pow(operand2)
+                "root" -> operand2.pow(1.0 / operand1!!) // y√x: operand1 = степень, operand2 = число
                 else -> 0.0
             }
             textViewResult.text = result.toString()
@@ -169,12 +167,10 @@ class MainActivity : AppCompatActivity() {
     private fun percentClick() {
         val current = textViewResult.text.toString().toDoubleOrNull()
         if (current != null && operand1 != null) {
-            // Процент от первого операнда
             val percentValue = operand1!! * current / 100
             textViewResult.text = percentValue.toString()
             newNumber = true
         } else {
-            // Если нет первого операнда, просто делим на 100
             textViewResult.text = (current?.div(100))?.toString() ?: "0"
         }
     }
@@ -187,43 +183,131 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ---------- Sciencific Mode ---------
+    // ---------- Scientific Mode ----------
     private fun initScientificMode() {
-        findViewById<Button>(R.id.buttonSin).setOnClickListener {
-            applyFunction("sin")
+        // Унарные функции
+        findViewById<Button>(R.id.buttonSin).setOnClickListener { applyFunction("sin") }
+        findViewById<Button>(R.id.buttonCos).setOnClickListener { applyFunction("cos") }
+        findViewById<Button>(R.id.buttonTan).setOnClickListener { applyFunction("tan") }
+        findViewById<Button>(R.id.buttonSinh).setOnClickListener { applyFunction("sinh") }
+        findViewById<Button>(R.id.buttonCosh).setOnClickListener { applyFunction("cosh") }
+        findViewById<Button>(R.id.buttonTanh).setOnClickListener { applyFunction("tanh") }
+
+        findViewById<Button>(R.id.buttonLn).setOnClickListener { applyFunction("ln") }
+        findViewById<Button>(R.id.buttonLog).setOnClickListener { applyFunction("log") }
+
+        findViewById<Button>(R.id.buttonSquare).setOnClickListener { applyFunction("square") }
+        findViewById<Button>(R.id.buttonCube).setOnClickListener { applyFunction("cube") }
+        findViewById<Button>(R.id.buttonInverse).setOnClickListener { applyFunction("inverse") }
+        findViewById<Button>(R.id.buttonSqrt).setOnClickListener { applyFunction("sqrt") }
+        findViewById<Button>(R.id.buttonCbrt).setOnClickListener { applyFunction("cbrt") }
+        findViewById<Button>(R.id.buttonFactorial).setOnClickListener { applyFunction("factorial") }
+
+        findViewById<Button>(R.id.buttonExp).setOnClickListener { applyFunction("exp") }
+        findViewById<Button>(R.id.buttonTenPower).setOnClickListener { applyFunction("tenPow") }
+
+        // Бинарные операторы
+        findViewById<Button>(R.id.buttonPowerY).setOnClickListener { operatorClick("^") }
+        findViewById<Button>(R.id.buttonYRootX).setOnClickListener { operatorClick("root") }
+
+        // Константы
+        findViewById<Button>(R.id.buttonPi).setOnClickListener { insertConstant("π") }
+        findViewById<Button>(R.id.buttonE).setOnClickListener { insertConstant("e") }
+
+        // Память
+        findViewById<Button>(R.id.buttonMC).setOnClickListener { memoryClear() }
+        findViewById<Button>(R.id.buttonMR).setOnClickListener { memoryRecall() }
+        findViewById<Button>(R.id.buttonMPlus).setOnClickListener { memoryAdd() }
+        findViewById<Button>(R.id.buttonMMinus).setOnClickListener { memorySubtract() }
+
+        // Заглушки для скобок и 2nd
+        findViewById<Button>(R.id.button2nd).setOnClickListener {
+            Toast.makeText(this, "2nd function not implemented", Toast.LENGTH_SHORT).show()
         }
-        findViewById<Button>(R.id.buttonCos).setOnClickListener {
-            applyFunction("cos")
+        findViewById<Button>(R.id.buttonLeftParen).setOnClickListener {
+            Toast.makeText(this, "( not implemented", Toast.LENGTH_SHORT).show()
         }
-        findViewById<Button>(R.id.buttonTan).setOnClickListener {
-            applyFunction("tan")
+        findViewById<Button>(R.id.buttonRightParen).setOnClickListener {
+            Toast.makeText(this, ") not implemented", Toast.LENGTH_SHORT).show()
         }
-        findViewById<Button>(R.id.buttonLn).setOnClickListener {
-            applyFunction("ln")
+        findViewById<Button>(R.id.buttonLeftParen2).setOnClickListener {
+            Toast.makeText(this, "( not implemented", Toast.LENGTH_SHORT).show()
         }
-        findViewById<Button>(R.id.buttonLog).setOnClickListener {
-            applyFunction("log")
+        findViewById<Button>(R.id.buttonRightParen2).setOnClickListener {
+            Toast.makeText(this, ") not implemented", Toast.LENGTH_SHORT).show()
         }
-        findViewById<Button>(R.id.buttonSquare).setOnClickListener {
-            applyFunction("square")
+        findViewById<Button>(R.id.buttonEE).setOnClickListener {
+            Toast.makeText(this, "EE not implemented", Toast.LENGTH_SHORT).show()
         }
-        // и так далее...
     }
 
     private fun applyFunction(func: String) {
         val current = textViewResult.text.toString().toDoubleOrNull()
         if (current != null) {
             val result = when (func) {
-                "sin" -> kotlin.math.sin(current)
-                "cos" -> kotlin.math.cos(current)
-                "tan" -> kotlin.math.tan(current)
-                "ln" -> kotlin.math.ln(current)
-                "log" -> kotlin.math.log10(current)
+                "sin" -> sin(current)
+                "cos" -> cos(current)
+                "tan" -> tan(current)
+                "sinh" -> sinh(current)
+                "cosh" -> cosh(current)
+                "tanh" -> tanh(current)
+                "ln" -> ln(current)
+                "log" -> log10(current)
                 "square" -> current * current
+                "cube" -> current * current * current
+                "inverse" -> 1.0 / current
+                "sqrt" -> sqrt(current)
+                "cbrt" -> cbrt(current)
+                "factorial" -> factorial(current.toLong()).toDouble()
+                "exp" -> exp(current)
+                "tenPow" -> 10.0.pow(current)
                 else -> current
             }
             textViewResult.text = result.toString()
             newNumber = true
+        }
+    }
+
+    private fun factorial(n: Long): Long {
+        return if (n <= 1) 1 else n * factorial(n - 1)
+    }
+
+    private fun insertConstant(constant: String) {
+        val value = when (constant) {
+            "π" -> PI
+            "e" -> E
+            else -> 0.0
+        }
+        if (newNumber) {
+            textViewResult.text = value.toString()
+            newNumber = false
+        } else {
+            textViewResult.text = textViewResult.text.toString() + value.toString()
+        }
+    }
+
+    // ---------- Memory Functions ----------
+    private fun memoryClear() {
+        memoryValue = 0.0
+        Toast.makeText(this, "Memory cleared", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun memoryRecall() {
+        textViewResult.text = memoryValue.toString()
+        newNumber = true
+    }
+
+    private fun memoryAdd() {
+        val current = textViewResult.text.toString().toDoubleOrNull()
+        if (current != null) {
+            memoryValue += current
+        }
+    }
+
+    private fun memorySubtract() {
+        val current = textViewResult.text.toString().toDoubleOrNull()
+        if (current != null) {
+            memoryValue -= current
         }
     }
 
@@ -235,14 +319,12 @@ class MainActivity : AppCompatActivity() {
         editTo = findViewById(R.id.editTo)
         spinnerToUnit = findViewById(R.id.spinnerToUnit)
 
-        // Пример: обновление единиц измерения при выборе категории
         spinnerCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                // В зависимости от категории подставляем соответствующие массивы единиц
                 val unitsArray = when (position) {
                     0 -> R.array.length_units
-                    1 -> R.array.weight_units   // нужно создать
-                    2 -> R.array.temperature_units // нужно создать
+                    1 -> R.array.weight_units
+                    2 -> R.array.temperature_units
                     else -> R.array.length_units
                 }
                 val adapter = ArrayAdapter.createFromResource(
@@ -253,21 +335,16 @@ class MainActivity : AppCompatActivity() {
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 spinnerFromUnit.adapter = adapter
                 spinnerToUnit.adapter = adapter
-                convert() // пересчитать
+                convert()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
-        // Слушатели изменения полей
-        editFrom.setOnEditorActionListener { _, _, _ ->
-            convert()
-            false
-        }
-        editFrom.addTextChangedListener(object : TextWatcher {
+        editFrom.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
+            override fun afterTextChanged(s: android.text.Editable?) {
                 convert()
             }
         })
@@ -303,19 +380,30 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun convertLength(value: Double, from: Int, to: Int): Double {
-        // Простейшая конвертация на основе коэффициентов к метрам
         val factors = doubleArrayOf(1.0, 1000.0, 1609.34) // meters, km, miles
         val valueInMeters = value * factors[from]
         return valueInMeters / factors[to]
     }
 
     private fun convertWeight(value: Double, from: Int, to: Int): Double {
-        // Заглушка
-        return value
+        val factors = doubleArrayOf(1.0, 0.001, 0.453592) // kg, g, lb (в kg)
+        val valueInKg = value * factors[from]
+        return valueInKg / factors[to]
     }
 
     private fun convertTemperature(value: Double, from: Int, to: Int): Double {
-        // Заглушка
-        return value
+        // Все в Celsius, потом в целевую
+        val inCelsius = when (from) {
+            0 -> value                 // Celsius
+            1 -> (value - 32) * 5.0/9.0 // Fahrenheit
+            2 -> value - 273.15         // Kelvin
+            else -> value
+        }
+        return when (to) {
+            0 -> inCelsius
+            1 -> inCelsius * 9.0/5.0 + 32
+            2 -> inCelsius + 273.15
+            else -> inCelsius
+        }
     }
 }

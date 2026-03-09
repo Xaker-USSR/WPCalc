@@ -51,7 +51,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Converter"/>
-
     </com.google.android.material.tabs.TabLayout>
 
     <!-- Контейнер для панелей режимов -->
@@ -71,7 +70,6 @@
             android:padding="8dp"
             android:background="#FF1A1A1A">
 
-            <!-- Строка с дополнительными кнопками (MC, MR, M+, M-, MS, M...) можно добавить позже -->
             <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -81,149 +79,201 @@
                 android:columnOrderPreserved="false"
                 android:padding="4dp">
 
-                <!-- Строка 1: C, +/-, %, / -->
+                <!-- Строка 1: C, +/-, %, ÷ -->
                 <Button
                     android:id="@+id/buttonClear"
-                    style="@style/WP10Button"
-                    android:text="C"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="C"/>
+
                 <Button
                     android:id="@+id/buttonPlusMinus"
-                    style="@style/WP10Button"
-                    android:text="±"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="±"/>
+
                 <Button
                     android:id="@+id/buttonPercent"
-                    style="@style/WP10Button"
-                    android:text="%"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="%"/>
+
                 <Button
                     android:id="@+id/buttonDivide"
                     style="@style/WP10OperatorButton"
-                    android:text="÷"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="÷"/>
 
                 <!-- Строка 2: 7, 8, 9, × -->
                 <Button
                     android:id="@+id/button7"
                     style="@style/WP10DigitButton"
-                    android:text="7"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="7"/>
+
                 <Button
                     android:id="@+id/button8"
                     style="@style/WP10DigitButton"
-                    android:text="8"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="8"/>
+
                 <Button
                     android:id="@+id/button9"
                     style="@style/WP10DigitButton"
-                    android:text="9"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="9"/>
+
                 <Button
                     android:id="@+id/buttonMultiply"
                     style="@style/WP10OperatorButton"
-                    android:text="×"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="×"/>
 
                 <!-- Строка 3: 4, 5, 6, - -->
                 <Button
                     android:id="@+id/button4"
                     style="@style/WP10DigitButton"
-                    android:text="4"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="4"/>
+
                 <Button
                     android:id="@+id/button5"
                     style="@style/WP10DigitButton"
-                    android:text="5"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="5"/>
+
                 <Button
                     android:id="@+id/button6"
                     style="@style/WP10DigitButton"
-                    android:text="6"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="6"/>
+
                 <Button
                     android:id="@+id/buttonMinus"
                     style="@style/WP10OperatorButton"
-                    android:text="-"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="-"/>
 
                 <!-- Строка 4: 1, 2, 3, + -->
                 <Button
                     android:id="@+id/button1"
                     style="@style/WP10DigitButton"
-                    android:text="1"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="1"/>
+
                 <Button
                     android:id="@+id/button2"
                     style="@style/WP10DigitButton"
-                    android:text="2"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="2"/>
+
                 <Button
                     android:id="@+id/button3"
                     style="@style/WP10DigitButton"
-                    android:text="3"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="3"/>
+
                 <Button
                     android:id="@+id/buttonPlus"
                     style="@style/WP10OperatorButton"
-                    android:text="+"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="+"/>
 
                 <!-- Строка 5: 0, ., = -->
                 <Button
                     android:id="@+id/button0"
                     style="@style/WP10DigitButton"
-                    android:text="0"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="2"
                     android:layout_rowWeight="1"
                     android:layout_columnSpan="2"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="0"/>
+
                 <Button
                     android:id="@+id/buttonDot"
                     style="@style/WP10DigitButton"
-                    android:text="."
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="."/>
+
                 <Button
                     android:id="@+id/buttonEquals"
                     style="@style/WP10OperatorButton"
-                    android:text="="
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
-                    android:layout_margin="4dp"/>
+                    android:layout_margin="4dp"
+                    android:text="="/>
             </GridLayout>
         </LinearLayout>
 
@@ -246,7 +296,7 @@
                 android:columnOrderPreserved="false"
                 android:padding="4dp">
 
-                <!-- Строка 1: ( ) mc m+ m- mr C -->
+                <!-- Строка 1: ( ) mc m+ m- mr -->
                 <Button
                     android:id="@+id/buttonLeftParen"
                     style="@style/WP10DigitButton"
@@ -490,7 +540,7 @@
                     android:layout_margin="2dp"
                     android:text="cosh" />
 
-                <!-- Строка 5: tanh π e EE ( ) ← (здесь скобки уже были, но оставим как есть) -->
+                <!-- Строка 5: tanh π e EE ( ) -->
                 <Button
                     android:id="@+id/buttonTanh"
                     style="@style/WP10DigitButton"
@@ -550,12 +600,10 @@
                     android:layout_rowWeight="1"
                     android:layout_margin="2dp"
                     android:text=")" />
-
-                <!-- Строка 6: если нужно, добавьте кнопки сюда по тому же принципу -->
             </GridLayout>
         </LinearLayout>
 
-        <!-- Панель Programmer (изначально скрыта) -->
+        <!-- Панель Programmer (изначально скрыта, заглушка) -->
         <LinearLayout
             android:id="@+id/panelProgrammer"
             android:layout_width="match_parent"
@@ -568,13 +616,12 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="Programmer panel – add buttons here"
+                android:text="Programmer mode – coming soon"
                 android:textColor="#FFFFFF"
                 android:gravity="center"/>
-
         </LinearLayout>
 
-        <!-- Панель Converter (изначально скрыта) -->
+        <!-- Панель Converter -->
         <LinearLayout
             android:id="@+id/panelConverter"
             android:layout_width="match_parent"
@@ -590,8 +637,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:entries="@array/converter_categories"
-                android:backgroundTint="#FFFFFF"
-                android:textColor="#FFFFFF"/>
+                android:background="@android:color/white"
+                android:popupBackground="@android:color/white"
+                android:textColor="#000000"
+                android:textSize="16sp"/>
 
             <!-- Поля ввода и выбора единиц -->
             <LinearLayout
@@ -607,8 +656,8 @@
                     android:layout_weight="1"
                     android:inputType="numberDecimal"
                     android:text="0"
-                    android:textColor="#FFFFFF"
-                    android:background="@drawable/edit_text_bg"
+                    android:textColor="#000000"
+                    android:background="@android:color/white"
                     android:padding="12dp"/>
 
                 <Spinner
@@ -618,9 +667,9 @@
                     android:layout_weight="1"
                     android:layout_marginStart="8dp"
                     android:entries="@array/length_units"
-                    android:backgroundTint="#FFFFFF"
-                    android:background="@android:color/white"/>
-
+                    android:background="@android:color/white"
+                    android:popupBackground="@android:color/white"
+                    android:textColor="#000000"/>
             </LinearLayout>
 
             <LinearLayout
@@ -636,8 +685,8 @@
                     android:layout_weight="1"
                     android:inputType="numberDecimal"
                     android:text="0"
-                    android:textColor="#FFFFFF"
-                    android:background="@drawable/edit_text_bg"
+                    android:textColor="#000000"
+                    android:background="@android:color/white"
                     android:padding="12dp"
                     android:enabled="false"/>
 
@@ -648,12 +697,10 @@
                     android:layout_weight="1"
                     android:layout_marginStart="8dp"
                     android:entries="@array/length_units"
-                    android:backgroundTint="#FFFFFF"
-                    android:background="@android:color/white"/>
-
+                    android:background="@android:color/white"
+                    android:popupBackground="@android:color/white"
+                    android:textColor="#000000"/>
             </LinearLayout>
-
         </LinearLayout>
     </FrameLayout>
-
 </LinearLayout>

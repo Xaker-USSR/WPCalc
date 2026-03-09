@@ -1,5 +1,5 @@
 <resources>
-    <!-- Базовый стиль приложения (тема) -->
+    <!-- Базовая тема приложения (наследуется от MaterialComponents) -->
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">#FF0078D7</item>
         <item name="colorPrimaryVariant">#FF0053A0</item>
@@ -10,25 +10,25 @@
 
     <!-- Базовый стиль для всех кнопок калькулятора -->
     <style name="WP10ButtonBase" parent="Widget.MaterialComponents.Button.UnelevatedButton">
-        <item name="android:textSize">24sp</item>
+        <item name="android:textSize">20sp</item>
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:background">@drawable/button_bg</item>
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
         <item name="android:stateListAnimator">@null</item>
         <item name="rippleColor">#33FFFFFF</item>
+        <!-- Запрещаем автоматические минимальные размеры Material -->
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
     </style>
 
+    <!-- Стиль для цифровых кнопок (тёмно-серый фон) -->
     <style name="WP10DigitButton" parent="WP10ButtonBase">
         <item name="android:background">@drawable/button_digit_bg</item>
     </style>
 
+    <!-- Стиль для кнопок операций (синий/оранжевый фон) -->
     <style name="WP10OperatorButton" parent="WP10ButtonBase">
         <item name="android:background">@drawable/button_operator_bg</item>
-    </style>
-
-    <style name="WP10Button" parent="WP10ButtonBase">
-        <!-- для остальных кнопок (C, ±, %) можно использовать тот же фон, что у цифр -->
-        <item name="android:background">@drawable/button_digit_bg</item>
     </style>
 </resources>
