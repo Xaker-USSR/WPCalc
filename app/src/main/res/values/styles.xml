@@ -1,0 +1,34 @@
+<resources>
+    <!-- Базовый стиль приложения (тема) -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#FF0078D7</item>
+        <item name="colorPrimaryVariant">#FF0053A0</item>
+        <item name="colorOnPrimary">#FFFFFFFF</item>
+        <item name="colorSecondary">#FF0078D7</item>
+        <item name="android:windowBackground">#FF1A1A1A</item>
+    </style>
+
+    <!-- Базовый стиль для всех кнопок калькулятора -->
+    <style name="WP10ButtonBase" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:background">@drawable/button_bg</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="rippleColor">#33FFFFFF</item>
+    </style>
+
+    <style name="WP10DigitButton" parent="WP10ButtonBase">
+        <item name="android:background">@drawable/button_digit_bg</item>
+    </style>
+
+    <style name="WP10OperatorButton" parent="WP10ButtonBase">
+        <item name="android:background">@drawable/button_operator_bg</item>
+    </style>
+
+    <style name="WP10Button" parent="WP10ButtonBase">
+        <!-- для остальных кнопок (C, ±, %) можно использовать тот же фон, что у цифр -->
+        <item name="android:background">@drawable/button_digit_bg</item>
+    </style>
+</resources>

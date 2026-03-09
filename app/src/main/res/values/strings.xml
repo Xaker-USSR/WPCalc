@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Calculator WP10</string>
+    <string-array name="converter_categories">
+        <item>Length</item>
+        <item>Weight</item>
+        <item>Temperature</item>
+    </string-array>
+    <string-array name="length_units">
+        <item>Meters</item>
+        <item>Kilometers</item>
+        <item>Miles</item>
+    </string-array>
+    <string-array name="weight_units">
+        <item>Kilograms</item>
+        <item>Grams</item>
+        <item>Pounds</item>
+    </string-array>
+    <string-array name="temperature_units">
+        <item>Celsius</item>
+        <item>Fahrenheit</item>
+        <item>Kelvin</item>
+    </string-array>
+</resources>

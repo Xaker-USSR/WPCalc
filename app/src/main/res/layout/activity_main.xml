@@ -1,0 +1,659 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FF1A1A1A">
+
+    <!-- Дисплей -->
+    <TextView
+        android:id="@+id/textViewResult"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="bottom|end"
+        android:padding="24dp"
+        android:text="0"
+        android:textSize="48sp"
+        android:textColor="#FFFFFFFF"
+        android:background="#FF2D2D2D"
+        android:fontFamily="sans-serif-light"/>
+
+    <!-- Панель переключения режимов -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FF2D2D2D"
+        app:tabTextColor="#FFAAAAAA"
+        app:tabSelectedTextColor="#FFFFFFFF"
+        app:tabIndicatorColor="#FF0078D7"
+        app:tabIndicatorHeight="3dp"
+        app:tabMode="fixed">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Standard"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Scientific"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Programmer"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Converter"/>
+
+    </com.google.android.material.tabs.TabLayout>
+
+    <!-- Контейнер для панелей режимов -->
+    <FrameLayout
+        android:id="@+id/panelContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2">
+
+        <!-- Панель Standard (видна по умолчанию) -->
+        <LinearLayout
+            android:id="@+id/panelStandard"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="visible"
+            android:padding="8dp"
+            android:background="#FF1A1A1A">
+
+            <!-- Строка с дополнительными кнопками (MC, MR, M+, M-, MS, M...) можно добавить позже -->
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:columnCount="4"
+                android:rowCount="5"
+                android:alignmentMode="alignMargins"
+                android:columnOrderPreserved="false"
+                android:padding="4dp">
+
+                <!-- Строка 1: C, +/-, %, / -->
+                <Button
+                    android:id="@+id/buttonClear"
+                    style="@style/WP10Button"
+                    android:text="C"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="4dp"/>
+                <Button
+                    android:id="@+id/buttonPlusMinus"
+                    style="@style/WP10Button"
+                    android:text="±"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="4dp"/>
+                <Button
+                    android:id="@+id/buttonPercent"
+                    style="@style/WP10Button"
+                    android:text="%"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="4dp"/>
+                <Button
+                    android:id="@+id/buttonDivide"
+                    style="@style/WP10OperatorButton"
+                    android:text="÷"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="4dp"/>
+
+                <!-- Строка 2: 7, 8, 9, × -->
+                <Button
+                    android:id="@+id/button7"
+                    style="@style/WP10DigitButton"
+                    android:text="7"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="4dp"/>
+                <Button
+                    android:id="@+id/button8"
+                    style="@style/WP10DigitButton"
+                    android:text="8"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="4dp"/>
+                <Button
+                    android:id="@+id/button9"
+                    style="@style/WP10DigitButton"
+                    android:text="9"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="4dp"/>
+                <Button
+                    android:id="@+id/buttonMultiply"
+                    style="@style/WP10OperatorButton"
+                    android:text="×"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="4dp"/>
+
+                <!-- Строка 3: 4, 5, 6, - -->
+                <Button
+                    android:id="@+id/button4"
+                    style="@style/WP10DigitButton"
+                    android:text="4"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="4dp"/>
+                <Button
+                    android:id="@+id/button5"
+                    style="@style/WP10DigitButton"
+                    android:text="5"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="4dp"/>
+                <Button
+                    android:id="@+id/button6"
+                    style="@style/WP10DigitButton"
+                    android:text="6"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="4dp"/>
+                <Button
+                    android:id="@+id/buttonMinus"
+                    style="@style/WP10OperatorButton"
+                    android:text="-"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="4dp"/>
+
+                <!-- Строка 4: 1, 2, 3, + -->
+                <Button
+                    android:id="@+id/button1"
+                    style="@style/WP10DigitButton"
+                    android:text="1"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="4dp"/>
+                <Button
+                    android:id="@+id/button2"
+                    style="@style/WP10DigitButton"
+                    android:text="2"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="4dp"/>
+                <Button
+                    android:id="@+id/button3"
+                    style="@style/WP10DigitButton"
+                    android:text="3"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="4dp"/>
+                <Button
+                    android:id="@+id/buttonPlus"
+                    style="@style/WP10OperatorButton"
+                    android:text="+"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="4dp"/>
+
+                <!-- Строка 5: 0, ., = -->
+                <Button
+                    android:id="@+id/button0"
+                    style="@style/WP10DigitButton"
+                    android:text="0"
+                    android:layout_columnWeight="2"
+                    android:layout_rowWeight="1"
+                    android:layout_columnSpan="2"
+                    android:layout_margin="4dp"/>
+                <Button
+                    android:id="@+id/buttonDot"
+                    style="@style/WP10DigitButton"
+                    android:text="."
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="4dp"/>
+                <Button
+                    android:id="@+id/buttonEquals"
+                    style="@style/WP10OperatorButton"
+                    android:text="="
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="4dp"/>
+            </GridLayout>
+        </LinearLayout>
+
+        <!-- Панель Scientific (изначально скрыта) -->
+        <LinearLayout
+            android:id="@+id/panelScientific"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:padding="8dp"
+            android:background="#FF1A1A1A">
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:columnCount="6"
+                android:rowCount="6"
+                android:alignmentMode="alignMargins"
+                android:columnOrderPreserved="false"
+                android:padding="4dp">
+
+                <!-- Строка 1: ( ) mc m+ m- mr C -->
+                <Button
+                    android:id="@+id/buttonLeftParen"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="(" />
+
+                <Button
+                    android:id="@+id/buttonRightParen"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text=")" />
+
+                <Button
+                    android:id="@+id/buttonMC"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="mc" />
+
+                <Button
+                    android:id="@+id/buttonMPlus"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="m+" />
+
+                <Button
+                    android:id="@+id/buttonMMinus"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="m-" />
+
+                <Button
+                    android:id="@+id/buttonMR"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="mr" />
+
+                <!-- Строка 2: 2nd x² x³ x^y ex 10^x -->
+                <Button
+                    android:id="@+id/button2nd"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="2nd" />
+
+                <Button
+                    android:id="@+id/buttonSquare"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="x²" />
+
+                <Button
+                    android:id="@+id/buttonCube"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="x³" />
+
+                <Button
+                    android:id="@+id/buttonPowerY"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="xʸ" />
+
+                <Button
+                    android:id="@+id/buttonExp"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="eˣ" />
+
+                <Button
+                    android:id="@+id/buttonTenPower"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="10ˣ" />
+
+                <!-- Строка 3: 1/x √ ∛ y√x ln log10 -->
+                <Button
+                    android:id="@+id/buttonInverse"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="1/x" />
+
+                <Button
+                    android:id="@+id/buttonSqrt"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="√" />
+
+                <Button
+                    android:id="@+id/buttonCbrt"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="∛" />
+
+                <Button
+                    android:id="@+id/buttonYRootX"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="ʸ√x" />
+
+                <Button
+                    android:id="@+id/buttonLn"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="ln" />
+
+                <Button
+                    android:id="@+id/buttonLog"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="log₁₀" />
+
+                <!-- Строка 4: x! sin cos tan sinh cosh tanh -->
+                <Button
+                    android:id="@+id/buttonFactorial"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="x!" />
+
+                <Button
+                    android:id="@+id/buttonSin"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="sin" />
+
+                <Button
+                    android:id="@+id/buttonCos"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="cos" />
+
+                <Button
+                    android:id="@+id/buttonTan"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="tan" />
+
+                <Button
+                    android:id="@+id/buttonSinh"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="sinh" />
+
+                <Button
+                    android:id="@+id/buttonCosh"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="cosh" />
+
+                <!-- Строка 5: tanh π e EE ( ) ← (здесь скобки уже были, но оставим как есть) -->
+                <Button
+                    android:id="@+id/buttonTanh"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="tanh" />
+
+                <Button
+                    android:id="@+id/buttonPi"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="π" />
+
+                <Button
+                    android:id="@+id/buttonE"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="e" />
+
+                <Button
+                    android:id="@+id/buttonEE"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="EE" />
+
+                <Button
+                    android:id="@+id/buttonLeftParen2"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text="(" />
+
+                <Button
+                    android:id="@+id/buttonRightParen2"
+                    style="@style/WP10DigitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="2dp"
+                    android:text=")" />
+
+                <!-- Строка 6: если нужно, добавьте кнопки сюда по тому же принципу -->
+            </GridLayout>
+        </LinearLayout>
+
+        <!-- Панель Programmer (изначально скрыта) -->
+        <LinearLayout
+            android:id="@+id/panelProgrammer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:padding="8dp"
+            android:background="#FF1A1A1A">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Programmer panel – add buttons here"
+                android:textColor="#FFFFFF"
+                android:gravity="center"/>
+
+        </LinearLayout>
+
+        <!-- Панель Converter (изначально скрыта) -->
+        <LinearLayout
+            android:id="@+id/panelConverter"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:padding="16dp"
+            android:background="#FF1A1A1A">
+
+            <!-- Выбор категории -->
+            <Spinner
+                android:id="@+id/spinnerCategory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/converter_categories"
+                android:backgroundTint="#FFFFFF"
+                android:textColor="#FFFFFF"/>
+
+            <!-- Поля ввода и выбора единиц -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp">
+
+                <EditText
+                    android:id="@+id/editFrom"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="numberDecimal"
+                    android:text="0"
+                    android:textColor="#FFFFFF"
+                    android:background="@drawable/edit_text_bg"
+                    android:padding="12dp"/>
+
+                <Spinner
+                    android:id="@+id/spinnerFromUnit"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:entries="@array/length_units"
+                    android:backgroundTint="#FFFFFF"
+                    android:background="@android:color/white"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp">
+
+                <EditText
+                    android:id="@+id/editTo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="numberDecimal"
+                    android:text="0"
+                    android:textColor="#FFFFFF"
+                    android:background="@drawable/edit_text_bg"
+                    android:padding="12dp"
+                    android:enabled="false"/>
+
+                <Spinner
+                    android:id="@+id/spinnerToUnit"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:entries="@array/length_units"
+                    android:backgroundTint="#FFFFFF"
+                    android:background="@android:color/white"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </FrameLayout>
+
+</LinearLayout>
