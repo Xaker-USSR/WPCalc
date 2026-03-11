@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- РАЗДЕЛИТЕЛЬ -->
+    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#3a3a3a" />
+
+    <!-- Строка с Trigonometry и Function (каждый занимает половину) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnTrigonometry"
+            style="@style/WP10TopButton"
+            android:text="Trigonometry ▼"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnFunction"
+            style="@style/WP10TopButton"
+            android:text="f Function ▼"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- Строка 2nd, π, e, C, ⌫ -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:weightSum="5">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn2nd"
+            style="@style/WP10TopButton"
+            android:text="2nd"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnPi"
+            style="@style/WP10TopButton"
+            android:text="π"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnE"
+            style="@style/WP10TopButton"
+            android:text="e"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnClear"
+            style="@style/WP10DigitButton"
+            android:text="C"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnBackspace"
+            style="@style/WP10DigitButton"
+            android:text="⌫"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- Строка x², 1/x, |x|, exp, mod -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:weightSum="5">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnSquare"
+            style="@style/WP10TopButton"
+            android:text="x²"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnReciprocal"
+            style="@style/WP10TopButton"
+            android:text="1/x"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnAbs"
+            style="@style/WP10TopButton"
+            android:text="|x|"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnExp"
+            style="@style/WP10TopButton"
+            android:text="exp"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnMod"
+            style="@style/WP10TopButton"
+            android:text="mod"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- Строка ∛, (, ), n!, ÷ -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:weightSum="5">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnCubeRoot"
+            style="@style/WP10TopButton"
+            android:text="∛"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnLeftParen"
+            style="@style/WP10DigitButton"
+            android:text="("
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnRightParen"
+            style="@style/WP10DigitButton"
+            android:text=")"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnFactorial"
+            style="@style/WP10DigitButton"
+            android:text="n!"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnDivide"
+            style="@style/WP10DigitButton"
+            android:text="÷"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- Строка x^y, 7, 8, 9, × -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:weightSum="5">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnPower"
+            style="@style/WP10TopButton"
+            android:text="x^y"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn7"
+            style="@style/WP10DigitButton"
+            android:text="7"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn8"
+            style="@style/WP10DigitButton"
+            android:text="8"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn9"
+            style="@style/WP10DigitButton"
+            android:text="9"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnMultiply"
+            style="@style/WP10DigitButton"
+            android:text="×"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- Строка 10^x, 4, 5, 6, − -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:weightSum="5">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn10x"
+            style="@style/WP10TopButton"
+            android:text="10^x"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn4"
+            style="@style/WP10DigitButton"
+            android:text="4"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn5"
+            style="@style/WP10DigitButton"
+            android:text="5"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn6"
+            style="@style/WP10DigitButton"
+            android:text="6"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnSubtract"
+            style="@style/WP10DigitButton"
+            android:text="–"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- Строка log, 1, 2, 3, + -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:weightSum="5">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnLog"
+            style="@style/WP10TopButton"
+            android:text="log"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn1"
+            style="@style/WP10DigitButton"
+            android:text="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn2"
+            style="@style/WP10DigitButton"
+            android:text="2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn3"
+            style="@style/WP10DigitButton"
+            android:text="3"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnAdd"
+            style="@style/WP10DigitButton"
+            android:text="+"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- Строка ln, +/-, 0, ., = -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:weightSum="5">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnLn"
+            style="@style/WP10TopButton"
+            android:text="ln"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnSign"
+            style="@style/WP10DigitButton"
+            android:text="±"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn0"
+            style="@style/WP10DigitButton"
+            android:text="0"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnDot"
+            style="@style/WP10DigitButton"
+            android:text=","
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnEquals"
+            style="@style/WP10DigitButton"
+            android:text="="
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
+</LinearLayout>
