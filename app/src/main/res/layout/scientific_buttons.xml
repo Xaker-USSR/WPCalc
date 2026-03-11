@@ -5,9 +5,12 @@
     android:orientation="vertical">
 
     <!-- РАЗДЕЛИТЕЛЬ -->
-    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#3a3a3a" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#3a3a3a" />
 
-    <!-- Строка с Trigonometry и Function (каждый занимает половину) -->
+    <!-- Строка 1: Trigonometry ▼ и f Function ▼ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -32,7 +35,7 @@
             android:layout_weight="1" />
     </LinearLayout>
 
-    <!-- Строка 2nd, π, e, C, ⌫ -->
+    <!-- Строка 2: 2nd, π, e, C, ⌫ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -81,7 +84,7 @@
             android:layout_weight="1" />
     </LinearLayout>
 
-    <!-- Строка x², 1/x, |x|, exp, mod -->
+    <!-- Строка 3: x², 1/x, |x|, exp, mod -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -130,7 +133,7 @@
             android:layout_weight="1" />
     </LinearLayout>
 
-    <!-- Строка ∛, (, ), n!, ÷ -->
+    <!-- Строка 4: ∛, (, ), n!, ÷ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -179,7 +182,7 @@
             android:layout_weight="1" />
     </LinearLayout>
 
-    <!-- Строка x^y, 7, 8, 9, × -->
+    <!-- Строка 5: ^, 7, 8, 9, × -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -190,7 +193,7 @@
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnPower"
             style="@style/WP10TopButton"
-            android:text="x^y"
+            android:text="^"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1" />
@@ -228,7 +231,7 @@
             android:layout_weight="1" />
     </LinearLayout>
 
-    <!-- Строка 10^x, 4, 5, 6, − -->
+    <!-- Строка 6: [10^/2^], 4, 5, 6, – -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -237,9 +240,9 @@
         android:weightSum="5">
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btn10x"
+            android:id="@+id/btnBasePow"
             style="@style/WP10TopButton"
-            android:text="10^x"
+            android:text="10^"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1" />
@@ -277,7 +280,7 @@
             android:layout_weight="1" />
     </LinearLayout>
 
-    <!-- Строка log, 1, 2, 3, + -->
+    <!-- Строка 7 (предпоследняя): ln, 1, 2, 3, + -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -286,9 +289,9 @@
         android:weightSum="5">
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnLog"
+            android:id="@+id/btnLn"
             style="@style/WP10TopButton"
-            android:text="log"
+            android:text="ln"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1" />
@@ -326,7 +329,7 @@
             android:layout_weight="1" />
     </LinearLayout>
 
-    <!-- Строка ln, +/-, 0, ., = -->
+    <!-- Строка 8 (последняя): log, ±, 0, ,, = -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -335,9 +338,9 @@
         android:weightSum="5">
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnLn"
+            android:id="@+id/btnLog"
             style="@style/WP10TopButton"
-            android:text="ln"
+            android:text="log"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1" />
