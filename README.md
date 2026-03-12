@@ -1,6 +1,7 @@
 WP10 Calculator for Android
 
 Калькулятор для Android, выполненный в стиле Windows Phone 10. Проект включает два режима работы (обычный и инженерный), историю вычислений, поддержку памяти, тригонометрические и другие научные функции. Полностью адаптивный дизайн с тёмной темой и квадратными кнопками, характерными для WP10.
+
 Скрины:
 <img width="1080" height="2400" alt="изображение" src="https://github.com/user-attachments/assets/319e1ae5-b4d9-4457-b9f3-a313adaea360" />
 <img width="1080" height="2400" alt="изображение" src="https://github.com/user-attachments/assets/3e77df73-ec7c-49c9-b250-1b77d955b889" />
