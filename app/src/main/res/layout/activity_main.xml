@@ -2,13 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#1a1a1a"
-    android:paddingTop="?attr/actionBarSize">
+    android:background="#1a1a1a">
 
-    <!-- Верхняя панель с меню, режимом, индикаторами и историей -->
+    <!-- Верхняя панель с меню, режимом и историей -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -34,31 +34,14 @@
             android:textSize="18sp"
             android:layout_marginStart="8dp" />
 
-        <!-- Индикаторы (можно оставить, можно убрать) -->
-        <TextView
-            android:id="@+id/tvDegRad"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="DEG"
-            android:textColor="#aaaaaa"
-            android:textSize="16sp"
-            android:padding="8dp" />
-
-        <TextView
-            android:id="@+id/tvFE"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="F-E"
-            android:textColor="#aaaaaa"
-            android:textSize="16sp"
-            android:padding="8dp" />
-
         <ImageButton
             android:id="@+id/btnHistory"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="12dp"
+            android:scaleX="1.2"
+            android:scaleY="1.2"
             android:src="@drawable/ic_history" />
     </LinearLayout>
 
@@ -75,7 +58,7 @@
         android:textSize="48sp"
         android:textStyle="bold" />
 
-    <!-- Строка памяти (6 кнопок) – остаётся всегда видимой -->
+    <!-- Строка памяти (6 кнопок) -->
     <LinearLayout
         android:id="@+id/memoryLayout"
         android:layout_width="match_parent"
@@ -133,7 +116,7 @@
             android:layout_weight="1" />
     </LinearLayout>
 
-    <!-- Контейнер для кнопок режима (сюда будет загружаться либо обычный, либо инженерный) -->
+    <!-- Контейнер для кнопок режима -->
     <FrameLayout
         android:id="@+id/buttonPanel"
         android:layout_width="match_parent"

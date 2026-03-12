@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.PopupWindow
 import android.widget.TextView
@@ -23,8 +24,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var tvResult: TextView
     private lateinit var tvMode: TextView
-    private lateinit var tvDegRad: TextView
-    private lateinit var tvFE: TextView
 
     private var currentExpression = StringBuilder()
     private var isNewOperation = true
@@ -34,6 +33,9 @@ class MainActivity : AppCompatActivity() {
     private var isScientificMode = false
     private var isSecondMode = false      // режим 2nd
     private var isHypMode = false         // режим гиперболических функций
+    private var isDegMode = true          // true = DEG, false = RAD
+    private var isFEMode = false          // для F-E (пока не используется)
+
     private val historyList = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,16 +44,12 @@ class MainActivity : AppCompatActivity() {
 
         tvResult = findViewById(R.id.tvResult)
         tvMode = findViewById(R.id.tvMode)
-        tvDegRad = findViewById(R.id.tvDegRad)
-        tvFE = findViewById(R.id.tvFE)
 
-        // Отступ под статус-бар
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
+        // Отступ под статус-бар для корневого layout
+        val rootLayout = findViewById<LinearLayout>(R.id.root_layout)
+        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { v, insets ->
             val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top
-            val btnMenu = findViewById<View>(R.id.btnMenu)
-            val tvMode = findViewById<View>(R.id.tvMode)
-            btnMenu.setPadding(btnMenu.paddingLeft, statusBarHeight, btnMenu.paddingRight, btnMenu.paddingBottom)
-            tvMode.setPadding(tvMode.paddingLeft, statusBarHeight, tvMode.paddingRight, tvMode.paddingBottom)
+            v.setPadding(v.paddingLeft, statusBarHeight, v.paddingRight, v.paddingBottom)
             insets
         }
 
@@ -108,25 +106,29 @@ class MainActivity : AppCompatActivity() {
             setScientificButtonListeners()
             updateSecondModeButtons()
             val btn2nd = findViewById<Button>(R.id.btn2nd)
-            btn2nd?.setBackgroundColor(0xFF8C00.toInt()) // оранжевый по умолчанию (неактивный)
+            btn2nd?.setBackgroundColor(0xFF8C00.toInt()) // оранжевый (неактивный)
         } else {
             setBasicFunctionButtonListeners()
         }
     }
 
-    // ---------- Обычные функции ----------
+    // ---------- Обычные функции (немедленное вычисление) ----------
     private fun setBasicFunctionButtonListeners() {
         findViewById<Button>(R.id.btnPercent)?.setOnClickListener {
-            appendFunction("%(")
+            applyUnaryOperation("%") { it / 100 }
         }
         findViewById<Button>(R.id.btnSqrt)?.setOnClickListener {
-            appendFunction("√(")
+            applyUnaryOperation("√") { sqrt(it) }
         }
         findViewById<Button>(R.id.btnSquare)?.setOnClickListener {
-            appendFunction("x²(")
+            applyUnaryOperation("x²") { it * it }
         }
         findViewById<Button>(R.id.btnReciprocal)?.setOnClickListener {
-            appendFunction("1/x(")
+            if (currentValue() == 0.0) {
+                tvResult.text = "Ошибка"
+                return@setOnClickListener
+            }
+            applyUnaryOperation("1/x") { 1 / it }
         }
     }
 
@@ -147,51 +149,96 @@ class MainActivity : AppCompatActivity() {
             showTrigonometryMenu(view)
         }
 
-        findViewById<Button>(R.id.btnFunction)?.setOnClickListener {
-            Toast.makeText(this, "Function menu (в разработке)", Toast.LENGTH_SHORT).show()
+        // Кнопка f Function ▼
+        findViewById<Button>(R.id.btnFunction)?.setOnClickListener { view ->
+            showFunctionMenu(view)
         }
 
+        // Кнопка DEG/RAD
+        findViewById<Button>(R.id.btnDegRadToggle)?.setOnClickListener {
+            isDegMode = !isDegMode
+            (it as Button).text = if (isDegMode) "DEG" else "RAD"
+            Toast.makeText(this, "Режим углов: ${if (isDegMode) "DEG" else "RAD"}", Toast.LENGTH_SHORT).show()
+        }
+
+        // Кнопка F-E
+        findViewById<Button>(R.id.btnFEToggle)?.setOnClickListener {
+            isFEMode = !isFEMode
+            Toast.makeText(this, "Формат чисел: ${if (isFEMode) "экспоненциальный" else "обычный"}", Toast.LENGTH_SHORT).show()
+            // TODO: реализовать переключение формата отображения чисел
+        }
+
+        // π и e – константы (добавляем в выражение)
         findViewById<Button>(R.id.btnPi)?.setOnClickListener {
             appendConstant(PI.toString())
         }
-
         findViewById<Button>(R.id.btnE)?.setOnClickListener {
             appendConstant(E.toString())
         }
 
+        // Унарные функции – немедленное вычисление
         findViewById<Button>(R.id.btnAbs)?.setOnClickListener {
-            appendFunction("abs(")
+            applyUnaryOperation("abs") { abs(it) }
         }
-
         findViewById<Button>(R.id.btnExp)?.setOnClickListener {
-            appendFunction("exp(")
+            applyUnaryOperation("exp") { exp(it) }
         }
-
-        findViewById<Button>(R.id.btnMod)?.setOnClickListener {
-            appendOperator("mod")
-        }
-
         findViewById<Button>(R.id.btnCubeRoot)?.setOnClickListener {
-            appendFunction("cbrt(")
+            applyUnaryOperation("∛") { cbrt(it) }
+        }
+        findViewById<Button>(R.id.btnFactorial)?.setOnClickListener {
+            val value = currentValue().toInt()
+            if (value >= 0) {
+                var fact = 1.0
+                for (i in 1..value) fact *= i
+                tvResult.text = formatNumber(fact)
+                addToHistory("n!($value)", fact)
+                currentExpression.clear()
+                currentExpression.append(fact)
+                isNewOperation = true
+                isDecimalPressed = false
+            } else {
+                tvResult.text = "Ошибка"
+            }
         }
 
+        // Скобки – добавляем в выражение
         findViewById<Button>(R.id.btnLeftParen)?.setOnClickListener {
             appendToExpression("(")
         }
-
         findViewById<Button>(R.id.btnRightParen)?.setOnClickListener {
             appendToExpression(")")
         }
 
-        findViewById<Button>(R.id.btnFactorial)?.setOnClickListener {
-            appendFunction("n!(")
-        }
-
-        // Кнопка возведения в степень ^ (бывшая x^y)
+        // Кнопка возведения в степень ^ (бинарный оператор)
         findViewById<Button>(R.id.btnPower)?.setOnClickListener {
-            onOperatorClickWithSymbol("^")  // используем существующий метод
+            appendOperator("^")
         }
 
+        // Кнопка log (в обычном режиме – немедленный log10, в режиме 2nd – бинарный log_y)
+        findViewById<Button>(R.id.btnLog)?.setOnClickListener {
+            if (isSecondMode) {
+                appendToExpression("l")  // символ для log_y
+            } else {
+                applyUnaryOperation("log") { log10(it) }
+            }
+        }
+
+        // Кнопка ln – немедленный натуральный логарифм
+        findViewById<Button>(R.id.btnLn)?.setOnClickListener {
+            applyUnaryOperation("ln") { ln(it) }
+        }
+
+        // Кнопка x² / x³ (немедленное вычисление в зависимости от 2nd)
+        findViewById<Button>(R.id.btnSquare)?.setOnClickListener {
+            if (isSecondMode) {
+                applyUnaryOperation("x³") { it * it * it }
+            } else {
+                applyUnaryOperation("x²") { it * it }
+            }
+        }
+
+        // Кнопка 10^ / 2^ (бинарный оператор, вставляем основание и символ степени)
         findViewById<Button>(R.id.btnBasePow)?.setOnClickListener {
             if (isSecondMode) {
                 appendToExpression("2^")
@@ -200,29 +247,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Кнопка log (меняется в режиме 2nd)
-        findViewById<Button>(R.id.btnLog)?.setOnClickListener {
-            if (isSecondMode) {
-                appendToExpression("l")  // символ для log_y (бинарный)
-            } else {
-                appendFunction("log(")
-            }
+        // mod – бинарный оператор
+        findViewById<Button>(R.id.btnMod)?.setOnClickListener {
+            appendOperator("mod")
         }
-
-        findViewById<Button>(R.id.btnLn)?.setOnClickListener {
-            appendFunction("ln(")
-        }
-
-        // Кнопка x² / x³ (меняется в режиме 2nd)
-        findViewById<Button>(R.id.btnSquare)?.setOnClickListener {
-            if (isSecondMode) {
-                appendFunction("x³(")
-            } else {
-                appendFunction("x²(")
-            }
-        }
-
-        // Кнопки 10^x и 2^x удалены
     }
 
     // ---------- Тригонометрическое меню ----------
@@ -307,32 +335,168 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnSin.setOnClickListener {
-            appendFunction(btnSin.text.toString() + "(")
+            val symbol = btnSin.text.toString()
+            applyTrigonometry(symbol) { x ->
+                when (symbol) {
+                    "sin" -> sin(if (isDegMode) Math.toRadians(x) else x)
+                    "arcsin" -> {
+                        val res = asin(x)
+                        if (isDegMode) Math.toDegrees(res) else res
+                    }
+                    "sinh" -> sinh(x)
+                    "arsinh" -> asinh(x)
+                    else -> x
+                }
+            }
             popupWindow.dismiss()
         }
 
         btnCos.setOnClickListener {
-            appendFunction(btnCos.text.toString() + "(")
+            val symbol = btnCos.text.toString()
+            applyTrigonometry(symbol) { x ->
+                when (symbol) {
+                    "cos" -> cos(if (isDegMode) Math.toRadians(x) else x)
+                    "arccos" -> {
+                        val res = acos(x)
+                        if (isDegMode) Math.toDegrees(res) else res
+                    }
+                    "cosh" -> cosh(x)
+                    "arcosh" -> acosh(x)
+                    else -> x
+                }
+            }
             popupWindow.dismiss()
         }
 
         btnTan.setOnClickListener {
-            appendFunction(btnTan.text.toString() + "(")
+            val symbol = btnTan.text.toString()
+            applyTrigonometry(symbol) { x ->
+                when (symbol) {
+                    "tan" -> tan(if (isDegMode) Math.toRadians(x) else x)
+                    "arctan" -> {
+                        val res = atan(x)
+                        if (isDegMode) Math.toDegrees(res) else res
+                    }
+                    "tanh" -> tanh(x)
+                    "artanh" -> atanh(x)
+                    else -> x
+                }
+            }
             popupWindow.dismiss()
         }
 
         btnSec.setOnClickListener {
-            appendFunction(btnSec.text.toString() + "(")
+            val symbol = btnSec.text.toString()
+            applyTrigonometry(symbol) { x ->
+                when (symbol) {
+                    "sec" -> 1 / cos(if (isDegMode) Math.toRadians(x) else x)
+                    "arcsec" -> {
+                        val res = acos(1 / x)
+                        if (isDegMode) Math.toDegrees(res) else res
+                    }
+                    "sech" -> 1 / cosh(x)
+                    "arsech" -> acosh(1 / x)
+                    else -> x
+                }
+            }
             popupWindow.dismiss()
         }
 
         btnCsc.setOnClickListener {
-            appendFunction(btnCsc.text.toString() + "(")
+            val symbol = btnCsc.text.toString()
+            applyTrigonometry(symbol) { x ->
+                when (symbol) {
+                    "csc" -> 1 / sin(if (isDegMode) Math.toRadians(x) else x)
+                    "arccsc" -> {
+                        val res = asin(1 / x)
+                        if (isDegMode) Math.toDegrees(res) else res
+                    }
+                    "csch" -> 1 / sinh(x)
+                    "arcsch" -> asinh(1 / x)
+                    else -> x
+                }
+            }
             popupWindow.dismiss()
         }
 
         btnCot.setOnClickListener {
-            appendFunction(btnCot.text.toString() + "(")
+            val symbol = btnCot.text.toString()
+            applyTrigonometry(symbol) { x ->
+                when (symbol) {
+                    "cot" -> 1 / tan(if (isDegMode) Math.toRadians(x) else x)
+                    "arccot" -> {
+                        val res = atan(1 / x)
+                        if (isDegMode) Math.toDegrees(res) else res
+                    }
+                    "coth" -> 1 / tanh(x)
+                    "arcoth" -> atanh(1 / x)
+                    else -> x
+                }
+            }
+            popupWindow.dismiss()
+        }
+
+        popupWindow.showAsDropDown(anchor, 0, 0)
+    }
+
+    // ---------- Меню функций ----------
+    private fun showFunctionMenu(anchor: View) {
+        val inflater = LayoutInflater.from(this)
+        val menuView = inflater.inflate(R.layout.function_menu, null)
+        val displayMetrics = resources.displayMetrics
+        val width = (400 * displayMetrics.density).toInt()
+        val popupWindow = PopupWindow(
+            menuView,
+            width,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            true
+        )
+        popupWindow.isOutsideTouchable = true
+        popupWindow.isFocusable = true
+        popupWindow.elevation = 10f
+
+        val btnAbs = menuView.findViewById<Button>(R.id.btnMenuAbs)
+        val btnFloor = menuView.findViewById<Button>(R.id.btnMenuFloor)
+        val btnCeil = menuView.findViewById<Button>(R.id.btnMenuCeil)
+        val btnRand = menuView.findViewById<Button>(R.id.btnMenuRand)
+        val btnDms = menuView.findViewById<Button>(R.id.btnMenuDms)
+        val btnDeg = menuView.findViewById<Button>(R.id.btnMenuDeg)
+
+        btnAbs.setOnClickListener {
+            applyUnaryOperation("abs") { abs(it) }
+            popupWindow.dismiss()
+        }
+
+        btnFloor.setOnClickListener {
+            applyUnaryOperation("floor") { floor(it) }
+            popupWindow.dismiss()
+        }
+
+        btnCeil.setOnClickListener {
+            applyUnaryOperation("ceil") { ceil(it) }
+            popupWindow.dismiss()
+        }
+
+        btnRand.setOnClickListener {
+            val randValue = (0..10000).random() / 10000.0
+            tvResult.text = formatNumber(randValue)
+            addToHistory("rand", randValue)
+            currentExpression.clear()
+            currentExpression.append(randValue)
+            isNewOperation = true
+            isDecimalPressed = false
+            popupWindow.dismiss()
+        }
+
+        btnDms.setOnClickListener {
+            Toast.makeText(this, "DMS conversion not implemented", Toast.LENGTH_SHORT).show()
+            popupWindow.dismiss()
+        }
+
+        btnDeg.setOnClickListener {
+            isDegMode = !isDegMode
+            findViewById<Button>(R.id.btnDegRadToggle)?.text = if (isDegMode) "DEG" else "RAD"
+            Toast.makeText(this, "Режим углов: ${if (isDegMode) "DEG" else "RAD"}", Toast.LENGTH_SHORT).show()
             popupWindow.dismiss()
         }
 
@@ -388,7 +552,12 @@ class MainActivity : AppCompatActivity() {
     private fun setMemoryButtonListeners() {
         findViewById<Button>(R.id.btnMC)?.setOnClickListener { memory = 0.0 }
         findViewById<Button>(R.id.btnMR)?.setOnClickListener {
-            appendConstant(formatNumber(memory))
+            tvResult.text = formatNumber(memory)
+            isNewOperation = true
+            isDecimalPressed = memory.toString().contains(".")
+            addToHistory("MR →", memory)
+            currentExpression.clear()
+            currentExpression.append(memory)
         }
         findViewById<Button>(R.id.btnMPlus)?.setOnClickListener {
             memory += currentValue()
@@ -399,22 +568,8 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnMS)?.setOnClickListener {
             memory = currentValue()
         }
-        findViewById<Button>(R.id.btnMTriangle)?.setOnClickListener { view ->
-            val popup = PopupMenu(this, view)
-            popup.menuInflater.inflate(R.menu.memory_menu, popup.menu)
-            popup.setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.action_mc -> memory = 0.0
-                    R.id.action_mr -> {
-                        appendConstant(formatNumber(memory))
-                    }
-                    R.id.action_mplus -> memory += currentValue()
-                    R.id.action_mminus -> memory -= currentValue()
-                    R.id.action_ms -> memory = currentValue()
-                }
-                true
-            }
-            popup.show()
+        findViewById<Button>(R.id.btnMTriangle)?.setOnClickListener {
+            Toast.makeText(this, "Память: ${formatNumber(memory)}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -423,7 +578,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnClear)?.setOnClickListener { onClearClick() }
         findViewById<Button>(R.id.btnCE)?.setOnClickListener { onCEClick() }
         findViewById<Button>(R.id.btnBackspace)?.setOnClickListener { onBackspaceClick() }
-        findViewById<Button>(R.id.btnSign)?.setOnClickListener { appendFunction("±(") }
+        findViewById<Button>(R.id.btnSign)?.setOnClickListener { applyUnaryOperation("±") { -it } }
         findViewById<Button>(R.id.btnDot)?.setOnClickListener { onDotClick() }
     }
 
@@ -466,10 +621,6 @@ class MainActivity : AppCompatActivity() {
         isDecimalPressed = currentExpression.contains(".")
     }
 
-    private fun appendFunction(func: String) {
-        appendToExpression("$func(")
-    }
-
     private fun appendOperator(op: String) {
         appendToExpression(op)
     }
@@ -502,7 +653,7 @@ class MainActivity : AppCompatActivity() {
         isDecimalPressed = false
     }
 
-    // ---------- Вычисление выражения ----------
+    // ---------- Вычисление выражения для бинарных операций ----------
     private fun evaluateCurrentExpression() {
         var expr = currentExpression.toString()
         if (expr.isEmpty()) return
@@ -527,6 +678,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Парсер выражений (обратная польская нотация) – без изменений
     private fun evaluateExpression(expression: String): Double {
         val output = mutableListOf<Any>()
         val stack = Stack<Any>()
@@ -546,6 +698,7 @@ class MainActivity : AppCompatActivity() {
             "arsech" to 5, "arcsch" to 5, "arcoth" to 5,
             "ln" to 5, "log" to 5, "exp" to 5,
             "sqrt" to 5, "cbrt" to 5, "abs" to 5,
+            "floor" to 5, "ceil" to 5,
             "n!" to 5, "x²" to 5, "x³" to 5,
             "%" to 5, "±" to 5
         )
@@ -616,24 +769,60 @@ class MainActivity : AppCompatActivity() {
                 is String -> {
                     val arg = valueStack.pop()
                     val result = when (token) {
-                        "sin" -> sin(arg)
-                        "cos" -> cos(arg)
-                        "tan" -> tan(arg)
-                        "arcsin" -> asin(arg)
-                        "arccos" -> acos(arg)
-                        "arctan" -> atan(arg)
+                        "sin" -> {
+                            val rad = if (isDegMode) Math.toRadians(arg) else arg
+                            sin(rad)
+                        }
+                        "cos" -> {
+                            val rad = if (isDegMode) Math.toRadians(arg) else arg
+                            cos(rad)
+                        }
+                        "tan" -> {
+                            val rad = if (isDegMode) Math.toRadians(arg) else arg
+                            tan(rad)
+                        }
+                        "arcsin" -> {
+                            val res = asin(arg)
+                            if (isDegMode) Math.toDegrees(res) else res
+                        }
+                        "arccos" -> {
+                            val res = acos(arg)
+                            if (isDegMode) Math.toDegrees(res) else res
+                        }
+                        "arctan" -> {
+                            val res = atan(arg)
+                            if (isDegMode) Math.toDegrees(res) else res
+                        }
                         "sinh" -> sinh(arg)
                         "cosh" -> cosh(arg)
                         "tanh" -> tanh(arg)
                         "arsinh" -> asinh(arg)
                         "arcosh" -> acosh(arg)
                         "artanh" -> atanh(arg)
-                        "sec" -> 1 / cos(arg)
-                        "csc" -> 1 / sin(arg)
-                        "cot" -> 1 / tan(arg)
-                        "arcsec" -> acos(1 / arg)
-                        "arccsc" -> asin(1 / arg)
-                        "arccot" -> atan(1 / arg)
+                        "sec" -> {
+                            val rad = if (isDegMode) Math.toRadians(arg) else arg
+                            1 / cos(rad)
+                        }
+                        "csc" -> {
+                            val rad = if (isDegMode) Math.toRadians(arg) else arg
+                            1 / sin(rad)
+                        }
+                        "cot" -> {
+                            val rad = if (isDegMode) Math.toRadians(arg) else arg
+                            1 / tan(rad)
+                        }
+                        "arcsec" -> {
+                            val res = acos(1 / arg)
+                            if (isDegMode) Math.toDegrees(res) else res
+                        }
+                        "arccsc" -> {
+                            val res = asin(1 / arg)
+                            if (isDegMode) Math.toDegrees(res) else res
+                        }
+                        "arccot" -> {
+                            val res = atan(1 / arg)
+                            if (isDegMode) Math.toDegrees(res) else res
+                        }
                         "sech" -> 1 / cosh(arg)
                         "csch" -> 1 / sinh(arg)
                         "coth" -> 1 / tanh(arg)
@@ -646,6 +835,8 @@ class MainActivity : AppCompatActivity() {
                         "sqrt" -> sqrt(arg)
                         "cbrt" -> cbrt(arg)
                         "abs" -> abs(arg)
+                        "floor" -> floor(arg)
+                        "ceil" -> ceil(arg)
                         "n!" -> {
                             var fact = 1.0
                             for (j in 1..arg.toInt()) fact *= j
@@ -679,12 +870,33 @@ class MainActivity : AppCompatActivity() {
         return valueStack.pop()
     }
 
+    // ---------- Унарные операции (немедленное вычисление) ----------
+    private fun applyUnaryOperation(symbol: String, operation: (Double) -> Double) {
+        val value = currentValue()
+        val result = operation(value)
+        if (result.isNaN() || result.isInfinite()) {
+            tvResult.text = "Ошибка"
+        } else {
+            tvResult.text = formatNumber(result)
+            addToHistory("$symbol(${formatNumber(value)})", result)
+            currentExpression.clear()
+            currentExpression.append(result)
+        }
+        isNewOperation = true
+        isDecimalPressed = false
+    }
+
+    private fun applyTrigonometry(symbol: String, operation: (Double) -> Double) {
+        applyUnaryOperation(symbol, operation)
+    }
+
     // ---------- Остальные методы ----------
     private fun currentValue(): Double {
         return tvResult.text.toString().toDoubleOrNull() ?: 0.0
     }
 
     private fun formatNumber(value: Double): String {
+        // TODO: учесть isFEMode для экспоненциального формата
         return if (value == value.toLong().toDouble()) {
             value.toLong().toString()
         } else {
@@ -725,10 +937,6 @@ class MainActivity : AppCompatActivity() {
         isDecimalPressed = currentExpression.contains(".")
     }
 
-    private fun onSignClick() {
-        appendFunction("±(")
-    }
-
     private fun onDotClick() {
         if (isDecimalPressed) return
         if (isNewOperation) {
@@ -740,9 +948,5 @@ class MainActivity : AppCompatActivity() {
             tvResult.append(".")
         }
         isDecimalPressed = true
-    }
-
-    private fun onOperatorClickWithSymbol(symbol: String) {
-        appendToExpression(symbol)
     }
 }

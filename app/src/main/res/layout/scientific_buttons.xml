@@ -10,13 +10,29 @@
         android:layout_height="1dp"
         android:background="#3a3a3a" />
 
-    <!-- Строка 1: Trigonometry ▼ и f Function ▼ -->
+    <!-- Строка 1: [DEG/RAD] [F-E] [Trigonometry ▼] [f Function ▼] -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="horizontal"
-        android:weightSum="2">
+        android:weightSum="4">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnDegRadToggle"
+            style="@style/WP10TopButton"
+            android:text="DEG"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnFEToggle"
+            style="@style/WP10TopButton"
+            android:text="F-E"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnTrigonometry"
@@ -280,7 +296,7 @@
             android:layout_weight="1" />
     </LinearLayout>
 
-    <!-- Строка 7 (предпоследняя): ln, 1, 2, 3, + -->
+    <!-- Строка 7: ln, 1, 2, 3, + -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -329,7 +345,7 @@
             android:layout_weight="1" />
     </LinearLayout>
 
-    <!-- Строка 8 (последняя): log, ±, 0, ,, = -->
+    <!-- Строка 8: log, ±, 0, ,, = -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
