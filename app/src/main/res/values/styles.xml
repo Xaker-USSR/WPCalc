@@ -1,32 +1,49 @@
 <resources>
     <!-- Базовая тема приложения -->
     <style name="Theme.WP10Calculator" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">#000000</item>
+        <item name="android:windowBackground">@color/background_dark</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/gray_light</item>
+    </style>
+
+    <!-- Стиль для NavigationView в тёмной теме -->
+    <style name="Widget.WP10Calculator.NavigationView" parent="Widget.MaterialComponents.NavigationView">
+        <item name="android:background">@color/gray_dark</item>
+        <item name="itemIconTint">@color/white</item>
+        <item name="itemTextColor">@color/white</item>
+        <item name="itemIconSize">24dp</item>
+        <item name="elevation">0dp</item>
+        <item name="android:listDivider">@color/gray_700</item>
     </style>
 
     <!-- Базовый стиль для всех кнопок -->
     <style name="WP10BaseButton" parent="">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">match_parent</item>
-        <item name="android:textColor">#ffffff</item>
+        <item name="android:textColor">@color/white</item>
         <item name="android:textSize">20sp</item>
         <item name="android:gravity">center</item>
+        <item name="android:background">@color/gray_700</item>
+        <item name="android:stateListAnimator">@null</item>
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
         <item name="android:padding">0dp</item>
-        <!-- Отключаем подкраску фона -->
+        <item name="cornerRadius">0dp</item>
         <item name="android:backgroundTint">@null</item>
     </style>
 
-    <!-- Кнопки верхней части (память, функции) - чёрные -->
+    <!-- Верхние кнопки (память, функции, буквы A‑F, сдвиги, QWORD и т.д.) – сливаются с фоном -->
     <style name="WP10TopButton" parent="WP10BaseButton">
-        <item name="android:background">#1A1A1A</item>
+        <item name="android:background">@color/background_dark</item>
     </style>
 
-    <!-- Цифровые кнопки и операторы - светло-серые -->
+    <!-- Цифровые кнопки и операторы – светло-серые (заметные) -->
     <style name="WP10DigitButton" parent="WP10BaseButton">
-        <item name="android:background">#3a3a3a</item>
+        <item name="android:background">@color/gray_700</item>
     </style>
 </resources>

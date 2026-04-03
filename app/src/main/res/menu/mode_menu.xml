@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/mode_standard" android:title="Обычный" />
-    <item android:id="@+id/mode_scientific" android:title="Инженерный" />
+    <item android:id="@+id/mode_standard" android:title="@string/mode_standard" />
+    <item android:id="@+id/mode_scientific" android:title="@string/mode_scientific" />
+    <item android:id="@+id/mode_programmer" android:title="@string/mode_programmer" />
 </menu>

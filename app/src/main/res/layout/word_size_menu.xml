@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#2a2a2a"
+    android:padding="4dp">
+
+    <Button
+        android:id="@+id/btnQword"
+        style="@style/WP10TopButton"
+        android:text="QWORD (64 бита)"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_margin="2dp" />
+
+    <Button
+        android:id="@+id/btnDword"
+        style="@style/WP10TopButton"
+        android:text="DWORD (32 бита)"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_margin="2dp" />
+
+    <Button
+        android:id="@+id/btnWord"
+        style="@style/WP10TopButton"
+        android:text="WORD (16 бит)"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_margin="2dp" />
+
+    <Button
+        android:id="@+id/btnByte"
+        style="@style/WP10TopButton"
+        android:text="BYTE (8 бит)"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_margin="2dp" />
+
+</LinearLayout>

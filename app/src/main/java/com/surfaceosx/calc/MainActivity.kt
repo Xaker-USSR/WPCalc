@@ -1,40 +1,66 @@
 package com.surfaceosx.calc
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.LinearLayout
-import android.widget.PopupMenu
 import android.widget.PopupWindow
+import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import com.google.android.material.navigation.NavigationView
 import kotlin.math.*
 import java.util.Stack
+
+enum class CalculatorMode { STANDARD, SCIENTIFIC, PROGRAMMER }
+enum class NumberBase { HEX, DEC, OCT, BIN }
+enum class ShiftMode { ARITHMETIC, LOGICAL, ROTATE, ROTATE_CARRY }
+enum class WordSize { QWORD, DWORD, WORD, BYTE }
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var tvResult: TextView
     private lateinit var tvMode: TextView
+    private lateinit var drawerLayout: DrawerLayout
 
     private var currentExpression = StringBuilder()
     private var isNewOperation = true
     private var isDecimalPressed = false
     private var memory: Double = 0.0
 
-    private var isScientificMode = false
-    private var isSecondMode = false      // режим 2nd
-    private var isHypMode = false         // режим гиперболических функций
-    private var isDegMode = true          // true = DEG, false = RAD
-    private var isFEMode = false          // для F-E (пока не используется)
+    private var currentMode = CalculatorMode.STANDARD
+    private var isSecondMode = false
+    private var isHypMode = false
+    private var isDegMode = true
+    private var isFEMode = false
+
+    // Для режима программиста
+    private var currentBase = NumberBase.DEC
+    private var currentWordSize = WordSize.QWORD
+    private var currentBits = 64
+    private lateinit var tvHexValue: TextView
+    private lateinit var tvDecValue: TextView
+    private lateinit var tvOctValue: TextView
+    private lateinit var tvBinValue: TextView
+
+    // Компоненты битовой панели
+    private lateinit var standardKeyboard: View
+    private lateinit var bitKeyboard: View
+    private lateinit var bitKeyboardContainer: LinearLayout
+    private val bitButtons = mutableListOf<Button>()
+
+    private var shiftMode = ShiftMode.LOGICAL
 
     private val historyList = mutableListOf<String>()
 
@@ -44,8 +70,41 @@ class MainActivity : AppCompatActivity() {
 
         tvResult = findViewById(R.id.tvResult)
         tvMode = findViewById(R.id.tvMode)
+        drawerLayout = findViewById(R.id.drawer_layout)
 
-        // Отступ под статус-бар для корневого layout
+        // Navigation Drawer
+        val navigationView = findViewById<NavigationView>(R.id.nav_view)
+        val headerView = navigationView.getHeaderView(0)
+        headerView.setOnClickListener {
+            startActivity(Intent(this, AboutActivity::class.java))
+            drawerLayout.closeDrawers()
+        }
+
+        navigationView.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_standard -> {
+                    switchMode(CalculatorMode.STANDARD)
+                    drawerLayout.closeDrawers()
+                    true
+                }
+                R.id.nav_scientific -> {
+                    switchMode(CalculatorMode.SCIENTIFIC)
+                    drawerLayout.closeDrawers()
+                    true
+                }
+                R.id.nav_programmer -> {
+                    switchMode(CalculatorMode.PROGRAMMER)
+                    drawerLayout.closeDrawers()
+                    true
+                }
+                else -> false
+            }
+        }
+
+        findViewById<ImageButton>(R.id.btnMenu).setOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
+
         val rootLayout = findViewById<LinearLayout>(R.id.root_layout)
         ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { v, insets ->
             val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top
@@ -53,66 +112,55 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        setupMenu()
         setupHistoryButton()
-        loadMode(isScientificMode)
+        loadMode(currentMode)
     }
 
     // ---------- Переключение режимов ----------
-    private fun setupMenu() {
-        findViewById<ImageButton>(R.id.btnMenu).setOnClickListener { view ->
-            val popup = PopupMenu(this, view)
-            popup.menuInflater.inflate(R.menu.mode_menu, popup.menu)
-            popup.setOnMenuItemClickListener { item: MenuItem ->
-                when (item.itemId) {
-                    R.id.mode_standard -> switchMode(false)
-                    R.id.mode_scientific -> switchMode(true)
-                }
-                true
-            }
-            popup.show()
+    private fun switchMode(mode: CalculatorMode) {
+        currentMode = mode
+        isSecondMode = false
+        isHypMode = false
+        loadMode(mode)
+        tvMode.text = when (mode) {
+            CalculatorMode.STANDARD -> getString(R.string.mode_standard)
+            CalculatorMode.SCIENTIFIC -> getString(R.string.mode_scientific)
+            CalculatorMode.PROGRAMMER -> getString(R.string.mode_programmer)
         }
     }
 
-    private fun switchMode(scientific: Boolean) {
-        isScientificMode = scientific
-        isSecondMode = false
-        isHypMode = false
-        loadMode(scientific)
-        tvMode.text = if (scientific) "инженерный" else "обычный"
-        clearExpression()
-    }
-
-    private fun loadMode(scientific: Boolean) {
+    private fun loadMode(mode: CalculatorMode) {
         val container = findViewById<FrameLayout>(R.id.buttonPanel)
         container.removeAllViews()
         val inflater = layoutInflater
-        val view = if (scientific) {
-            inflater.inflate(R.layout.scientific_buttons, container, false)
-        } else {
-            inflater.inflate(R.layout.basic_buttons, container, false)
+        val view = when (mode) {
+            CalculatorMode.STANDARD -> inflater.inflate(R.layout.basic_buttons, container, false)
+            CalculatorMode.SCIENTIFIC -> inflater.inflate(R.layout.scientific_buttons, container, false)
+            CalculatorMode.PROGRAMMER -> inflater.inflate(R.layout.programmer_buttons, container, false)
         }
         container.addView(view)
         setupButtonListeners()
     }
 
-    // ---------- Инициализация слушателей ----------
     private fun setupButtonListeners() {
         setNumberButtonListeners()
         setOperatorButtonListeners()
         setMemoryButtonListeners()
         setControlButtonListeners()
-        if (isScientificMode) {
-            setScientificButtonListeners()
-            updateSecondModeButtons()
-            val btn2nd = findViewById<Button>(R.id.btn2nd)
-            btn2nd?.setBackgroundColor(0xFF8C00.toInt()) // оранжевый (неактивный)
-        } else {
-            setBasicFunctionButtonListeners()
+
+        when (currentMode) {
+            CalculatorMode.STANDARD -> setBasicFunctionButtonListeners()
+            CalculatorMode.SCIENTIFIC -> {
+                setScientificButtonListeners()
+                updateSecondModeButtons()
+                val btn2nd = findViewById<Button>(R.id.btn2nd)
+                btn2nd?.setBackgroundColor(0xFF8C00)
+            }
+            CalculatorMode.PROGRAMMER -> setProgrammerButtonListeners()
         }
     }
 
-    // ---------- Обычные функции (немедленное вычисление) ----------
+    // ---------- Обычные функции ----------
     private fun setBasicFunctionButtonListeners() {
         findViewById<Button>(R.id.btnPercent)?.setOnClickListener {
             applyUnaryOperation("%") { it / 100 }
@@ -134,49 +182,37 @@ class MainActivity : AppCompatActivity() {
 
     // ---------- Научные функции ----------
     private fun setScientificButtonListeners() {
-        // Кнопка 2nd (основная)
         val btn2nd = findViewById<Button>(R.id.btn2nd)
-        btn2nd?.setBackgroundColor(0xFF8C00.toInt())
+        btn2nd?.setBackgroundColor(0xFF8C00)
         btn2nd?.setOnClickListener {
             isSecondMode = !isSecondMode
             updateSecondModeButtons()
-            btn2nd.setBackgroundColor(if (isSecondMode) 0xFF3a3a3a.toInt() else 0xFF8C00.toInt())
+            btn2nd.setBackgroundColor(if (isSecondMode) 0xFF3a3a3a.toInt() else 0xFF8C00)
             Toast.makeText(this, "2nd режим: ${if (isSecondMode) "вкл" else "выкл"}", Toast.LENGTH_SHORT).show()
         }
 
-        // Кнопка Trigonometry ▼
         findViewById<Button>(R.id.btnTrigonometry)?.setOnClickListener { view ->
             showTrigonometryMenu(view)
         }
-
-        // Кнопка f Function ▼
         findViewById<Button>(R.id.btnFunction)?.setOnClickListener { view ->
             showFunctionMenu(view)
         }
-
-        // Кнопка DEG/RAD
         findViewById<Button>(R.id.btnDegRadToggle)?.setOnClickListener {
             isDegMode = !isDegMode
             (it as Button).text = if (isDegMode) "DEG" else "RAD"
             Toast.makeText(this, "Режим углов: ${if (isDegMode) "DEG" else "RAD"}", Toast.LENGTH_SHORT).show()
         }
-
-        // Кнопка F-E
         findViewById<Button>(R.id.btnFEToggle)?.setOnClickListener {
             isFEMode = !isFEMode
             Toast.makeText(this, "Формат чисел: ${if (isFEMode) "экспоненциальный" else "обычный"}", Toast.LENGTH_SHORT).show()
-            // TODO: реализовать переключение формата отображения чисел
         }
 
-        // π и e – константы (добавляем в выражение)
         findViewById<Button>(R.id.btnPi)?.setOnClickListener {
             appendConstant(PI.toString())
         }
         findViewById<Button>(R.id.btnE)?.setOnClickListener {
             appendConstant(E.toString())
         }
-
-        // Унарные функции – немедленное вычисление
         findViewById<Button>(R.id.btnAbs)?.setOnClickListener {
             applyUnaryOperation("abs") { abs(it) }
         }
@@ -186,11 +222,17 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnCubeRoot)?.setOnClickListener {
             applyUnaryOperation("∛") { cbrt(it) }
         }
+        findViewById<Button>(R.id.btnLeftParen)?.setOnClickListener {
+            appendToExpression("(")
+        }
+        findViewById<Button>(R.id.btnRightParen)?.setOnClickListener {
+            appendToExpression(")")
+        }
         findViewById<Button>(R.id.btnFactorial)?.setOnClickListener {
             val value = currentValue().toInt()
             if (value >= 0) {
                 var fact = 1.0
-                for (i in 1..value) fact *= i
+                for (j in 1..value) fact *= j
                 tvResult.text = formatNumber(fact)
                 addToHistory("n!($value)", fact)
                 currentExpression.clear()
@@ -201,35 +243,19 @@ class MainActivity : AppCompatActivity() {
                 tvResult.text = "Ошибка"
             }
         }
-
-        // Скобки – добавляем в выражение
-        findViewById<Button>(R.id.btnLeftParen)?.setOnClickListener {
-            appendToExpression("(")
-        }
-        findViewById<Button>(R.id.btnRightParen)?.setOnClickListener {
-            appendToExpression(")")
-        }
-
-        // Кнопка возведения в степень ^ (бинарный оператор)
         findViewById<Button>(R.id.btnPower)?.setOnClickListener {
             appendOperator("^")
         }
-
-        // Кнопка log (в обычном режиме – немедленный log10, в режиме 2nd – бинарный log_y)
         findViewById<Button>(R.id.btnLog)?.setOnClickListener {
             if (isSecondMode) {
-                appendToExpression("l")  // символ для log_y
+                appendToExpression("l")
             } else {
                 applyUnaryOperation("log") { log10(it) }
             }
         }
-
-        // Кнопка ln – немедленный натуральный логарифм
         findViewById<Button>(R.id.btnLn)?.setOnClickListener {
             applyUnaryOperation("ln") { ln(it) }
         }
-
-        // Кнопка x² / x³ (немедленное вычисление в зависимости от 2nd)
         findViewById<Button>(R.id.btnSquare)?.setOnClickListener {
             if (isSecondMode) {
                 applyUnaryOperation("x³") { it * it * it }
@@ -237,8 +263,6 @@ class MainActivity : AppCompatActivity() {
                 applyUnaryOperation("x²") { it * it }
             }
         }
-
-        // Кнопка 10^ / 2^ (бинарный оператор, вставляем основание и символ степени)
         findViewById<Button>(R.id.btnBasePow)?.setOnClickListener {
             if (isSecondMode) {
                 appendToExpression("2^")
@@ -246,25 +270,323 @@ class MainActivity : AppCompatActivity() {
                 appendToExpression("10^")
             }
         }
-
-        // mod – бинарный оператор
         findViewById<Button>(R.id.btnMod)?.setOnClickListener {
             appendOperator("mod")
         }
     }
 
+    // ---------- Режим программиста ----------
+    private fun setProgrammerButtonListeners() {
+        tvHexValue = findViewById(R.id.tvHexValue)
+        tvDecValue = findViewById(R.id.tvDecValue)
+        tvOctValue = findViewById(R.id.tvOctValue)
+        tvBinValue = findViewById(R.id.tvBinValue)
+
+        // Радиокнопки СС
+        val radioGroup = findViewById<RadioGroup>(R.id.radioGroupBase)
+        radioGroup.setOnCheckedChangeListener { _, checkedId ->
+            val oldBase = currentBase
+            currentBase = when (checkedId) {
+                R.id.radioHex -> NumberBase.HEX
+                R.id.radioDec -> NumberBase.DEC
+                R.id.radioOct -> NumberBase.OCT
+                R.id.radioBin -> NumberBase.BIN
+                else -> NumberBase.DEC
+            }
+            val currentText = tvResult.text.toString()
+            val longValue = try {
+                when (oldBase) {
+                    NumberBase.HEX -> currentText.toLong(16)
+                    NumberBase.DEC -> currentText.toLong()
+                    NumberBase.OCT -> currentText.toLong(8)
+                    NumberBase.BIN -> currentText.toLong(2)
+                }
+            } catch (e: NumberFormatException) {
+                0L
+            }
+            tvResult.text = when (currentBase) {
+                NumberBase.HEX -> longValue.toString(16).uppercase()
+                NumberBase.DEC -> longValue.toString()
+                NumberBase.OCT -> longValue.toString(8)
+                NumberBase.BIN -> longValue.toString(2)
+            }
+            updateAllBaseDisplays(maskValue(longValue))
+        }
+        radioGroup.check(R.id.radioDec)
+
+        // Кнопки A-F
+        findViewById<Button>(R.id.btnA)?.setOnClickListener { appendHexDigit('A') }
+        findViewById<Button>(R.id.btnB)?.setOnClickListener { appendHexDigit('B') }
+        findViewById<Button>(R.id.btnC)?.setOnClickListener { appendHexDigit('C') }
+        findViewById<Button>(R.id.btnD)?.setOnClickListener { appendHexDigit('D') }
+        findViewById<Button>(R.id.btnE)?.setOnClickListener { appendHexDigit('E') }
+        findViewById<Button>(R.id.btnF)?.setOnClickListener { appendHexDigit('F') }
+
+        // QWORD – меню выбора размера
+        findViewById<Button>(R.id.btnQword)?.setOnClickListener { view ->
+            showWordSizeMenu(view)
+        }
+
+        // MS, треугольник
+        findViewById<Button>(R.id.btnMS_prog)?.setOnClickListener {
+            memory = currentValue()
+            Toast.makeText(this, "MS: ${formatNumber(memory)}", Toast.LENGTH_SHORT).show()
+        }
+        findViewById<Button>(R.id.btnTriangle_prog)?.setOnClickListener {
+            Toast.makeText(this, "Память: ${formatNumber(memory)}", Toast.LENGTH_SHORT).show()
+        }
+
+        // Переключатели режимов ввода
+        standardKeyboard = findViewById(R.id.standardKeyboard)
+        bitKeyboard = findViewById(R.id.bitKeyboard)
+        initBitKeyboard()
+        val btnStandardMode = findViewById<ImageButton>(R.id.btnStandardMode)
+        val btnBitMode = findViewById<ImageButton>(R.id.btnBitMode)
+        btnStandardMode.setOnClickListener {
+            standardKeyboard.visibility = View.VISIBLE
+            bitKeyboard.visibility = View.GONE
+            btnStandardMode.setColorFilter(0xFFFFFFFF.toInt())
+            btnBitMode.setColorFilter(0xFF888888.toInt())
+        }
+        btnBitMode.setOnClickListener {
+            standardKeyboard.visibility = View.GONE
+            bitKeyboard.visibility = View.VISIBLE
+            updateBitButtons()
+            btnStandardMode.setColorFilter(0xFF888888.toInt())
+            btnBitMode.setColorFilter(0xFFFFFFFF.toInt())
+        }
+        btnStandardMode.performClick()
+
+        // Bitwise и Bit Shift
+        findViewById<Button>(R.id.btnBitwise)?.setOnClickListener { view ->
+            showBitwiseMenu(view)
+        }
+        findViewById<Button>(R.id.btnBitShift)?.setOnClickListener { view ->
+            showBitShiftMenu(view)
+        }
+    }
+
+    // ---------- Битовая панель ----------
+    private fun initBitKeyboard() {
+        bitKeyboardContainer = bitKeyboard.findViewById(R.id.bitKeyboardContainer)
+        createBitButtons(currentBits)
+        updateBitButtons()
+    }
+
+    private fun createBitButtons(bits: Int) {
+        bitButtons.clear()
+        bitKeyboardContainer.removeAllViews()
+        val columns = 8
+        val rows = bits / columns
+        for (row in 0 until rows) {
+            val rowLayout = LinearLayout(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                orientation = LinearLayout.HORIZONTAL
+                weightSum = columns.toFloat()
+            }
+            for (col in 0 until columns) {
+                val bitIndex = row * columns + col
+                val cellLayout = LinearLayout(this).apply {
+                    layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                    orientation = LinearLayout.VERTICAL
+                    gravity = android.view.Gravity.CENTER
+                    setPadding(4, 4, 4, 4)
+                }
+                val button = Button(this).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        0,
+                        1f
+                    )
+                    text = "0"
+                    textSize = 16f
+                    setBackgroundColor(0xFF3a3a3a.toInt())
+                    setTextColor(android.graphics.Color.WHITE)
+                    setOnClickListener { onBitClick(bitIndex) }
+                }
+                val label = TextView(this).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    text = bitIndex.toString()
+                    textSize = 10f
+                    gravity = android.view.Gravity.CENTER
+                    setTextColor(android.graphics.Color.LTGRAY)
+                }
+                cellLayout.addView(button)
+                cellLayout.addView(label)
+                rowLayout.addView(cellLayout)
+                bitButtons.add(button)
+            }
+            bitKeyboardContainer.addView(rowLayout)
+        }
+    }
+
+    private fun updateBitButtons() {
+        if (!::bitKeyboardContainer.isInitialized || bitKeyboard.visibility != View.VISIBLE) return
+        val value = currentValueLong()
+        for (i in bitButtons.indices) {
+            val bit = (value shr i) and 1L
+            bitButtons[i].text = bit.toString()
+            bitButtons[i].setBackgroundColor(if (bit == 1L) 0xFF8C00 else 0xFF3a3a3a.toInt())
+        }
+    }
+
+    private fun onBitClick(bitIndex: Int) {
+        val value = currentValueLong()
+        val newValue = value xor (1L shl bitIndex)
+        updateDisplayAndAllBases(maskValue(newValue))
+        addToHistory("Bit $bitIndex toggle", maskValue(newValue).toDouble())
+    }
+
+    // ---------- Маскирование в зависимости от WordSize ----------
+    private fun maskValue(value: Long): Long {
+        return when (currentWordSize) {
+            WordSize.QWORD -> value
+            WordSize.DWORD -> value and 0xFFFFFFFFuL.toLong()
+            WordSize.WORD -> value and 0xFFFFuL.toLong()
+            WordSize.BYTE -> value and 0xFFuL.toLong()
+        }
+    }
+
+    // ---------- Меню выбора размера слова ----------
+    private fun showWordSizeMenu(anchor: View) {
+        val inflater = LayoutInflater.from(this)
+        val parent = anchor.parent as? ViewGroup ?: anchor.rootView as ViewGroup
+        val menuView = inflater.inflate(R.layout.word_size_menu, parent, false)
+        val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
+        popupWindow.isOutsideTouchable = true
+        popupWindow.isFocusable = true
+        popupWindow.elevation = 10f
+
+        menuView.findViewById<Button>(R.id.btnQword).setOnClickListener {
+            currentWordSize = WordSize.QWORD
+            currentBits = 64
+            findViewById<Button>(R.id.btnQword)?.text = "QWORD"
+            updateAfterWordSizeChange()
+            popupWindow.dismiss()
+        }
+        menuView.findViewById<Button>(R.id.btnDword).setOnClickListener {
+            currentWordSize = WordSize.DWORD
+            currentBits = 32
+            findViewById<Button>(R.id.btnQword)?.text = "DWORD"
+            updateAfterWordSizeChange()
+            popupWindow.dismiss()
+        }
+        menuView.findViewById<Button>(R.id.btnWord).setOnClickListener {
+            currentWordSize = WordSize.WORD
+            currentBits = 16
+            findViewById<Button>(R.id.btnQword)?.text = "WORD"
+            updateAfterWordSizeChange()
+            popupWindow.dismiss()
+        }
+        menuView.findViewById<Button>(R.id.btnByte).setOnClickListener {
+            currentWordSize = WordSize.BYTE
+            currentBits = 8
+            findViewById<Button>(R.id.btnQword)?.text = "BYTE"
+            updateAfterWordSizeChange()
+            popupWindow.dismiss()
+        }
+
+        popupWindow.showAsDropDown(anchor, 0, 0)
+    }
+
+    private fun updateAfterWordSizeChange() {
+        if (::bitKeyboardContainer.isInitialized) {
+            createBitButtons(currentBits)
+            updateBitButtons()
+        }
+        val masked = maskValue(currentValueLong())
+        updateDisplayAndAllBases(masked)
+        Toast.makeText(this, "Размер слова: ${currentWordSize.name}", Toast.LENGTH_SHORT).show()
+    }
+
+    // ---------- Bitwise и Bit Shift меню ----------
+    private fun showBitwiseMenu(anchor: View) {
+        val inflater = LayoutInflater.from(this)
+        val parent = anchor.parent as? ViewGroup ?: anchor.rootView as ViewGroup
+        val menuView = inflater.inflate(R.layout.bitwise_menu, parent, false)
+        val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
+        popupWindow.isOutsideTouchable = true
+        popupWindow.isFocusable = true
+        popupWindow.elevation = 10f
+
+        menuView.findViewById<Button>(R.id.btnAnd).setOnClickListener {
+            appendOperator("&")
+            popupWindow.dismiss()
+        }
+        menuView.findViewById<Button>(R.id.btnOr).setOnClickListener {
+            appendOperator("|")
+            popupWindow.dismiss()
+        }
+        menuView.findViewById<Button>(R.id.btnXor).setOnClickListener {
+            appendOperator("^")
+            popupWindow.dismiss()
+        }
+        menuView.findViewById<Button>(R.id.btnNot).setOnClickListener {
+            val value = currentValueLong()
+            val result = maskValue(value.inv())
+            updateDisplayAndAllBases(result)
+            addToHistory("NOT($value)", result.toDouble())
+            isNewOperation = true
+            isDecimalPressed = false
+            popupWindow.dismiss()
+        }
+        menuView.findViewById<Button>(R.id.btnNand).setOnClickListener {
+            Toast.makeText(this, "NAND (заглушка)", Toast.LENGTH_SHORT).show()
+            popupWindow.dismiss()
+        }
+        menuView.findViewById<Button>(R.id.btnNor).setOnClickListener {
+            Toast.makeText(this, "NOR (заглушка)", Toast.LENGTH_SHORT).show()
+            popupWindow.dismiss()
+        }
+
+        popupWindow.showAsDropDown(anchor, 0, 0)
+    }
+
+    private fun showBitShiftMenu(anchor: View) {
+        val inflater = LayoutInflater.from(this)
+        val parent = anchor.parent as? ViewGroup ?: anchor.rootView as ViewGroup
+        val menuView = inflater.inflate(R.layout.bit_shift_menu, parent, false)
+        val radioGroup = menuView.findViewById<RadioGroup>(R.id.radioGroupShiftMode)
+        val popupWindow = PopupWindow(menuView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true)
+        popupWindow.isOutsideTouchable = true
+        popupWindow.isFocusable = true
+        popupWindow.elevation = 10f
+
+        when (shiftMode) {
+            ShiftMode.ARITHMETIC -> radioGroup.check(R.id.radioArithShift)
+            ShiftMode.LOGICAL -> radioGroup.check(R.id.radioLogicalShift)
+            ShiftMode.ROTATE -> radioGroup.check(R.id.radioRotateShift)
+            ShiftMode.ROTATE_CARRY -> radioGroup.check(R.id.radioRotateCarryShift)
+        }
+
+        radioGroup.setOnCheckedChangeListener { _, checkedId ->
+            shiftMode = when (checkedId) {
+                R.id.radioArithShift -> ShiftMode.ARITHMETIC
+                R.id.radioLogicalShift -> ShiftMode.LOGICAL
+                R.id.radioRotateShift -> ShiftMode.ROTATE
+                R.id.radioRotateCarryShift -> ShiftMode.ROTATE_CARRY
+                else -> ShiftMode.LOGICAL
+            }
+            Toast.makeText(this, "Режим сдвига: $shiftMode", Toast.LENGTH_SHORT).show()
+            popupWindow.dismiss()
+        }
+
+        popupWindow.showAsDropDown(anchor, 0, 0)
+    }
+
     // ---------- Тригонометрическое меню ----------
     private fun showTrigonometryMenu(anchor: View) {
         val inflater = LayoutInflater.from(this)
-        val menuView = inflater.inflate(R.layout.trigonometry_menu, null)
-        val displayMetrics = resources.displayMetrics
-        val width = (450 * displayMetrics.density).toInt()
-        val popupWindow = PopupWindow(
-            menuView,
-            width,
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            true
-        )
+        val parent = anchor.parent as? ViewGroup ?: anchor.rootView as ViewGroup
+        val menuView = inflater.inflate(R.layout.trigonometry_menu, parent, false)
+        val width = (450 * resources.displayMetrics.density).toInt()
+        val popupWindow = PopupWindow(menuView, width, ViewGroup.LayoutParams.WRAP_CONTENT, true)
         popupWindow.isOutsideTouchable = true
         popupWindow.isFocusable = true
         popupWindow.elevation = 10f
@@ -315,8 +637,8 @@ class MainActivity : AppCompatActivity() {
                 isSecondMode -> "arccot"
                 else -> "cot"
             }
-            btnHyp.setBackgroundColor(if (isHypMode) 0xFF8C00.toInt() else 0xFF3a3a3a.toInt())
-            btn2nd.setBackgroundColor(if (isSecondMode) 0xFF8C00.toInt() else 0xFF3a3a3a.toInt())
+            btnHyp.setBackgroundColor(if (isHypMode) 0xFF8C00 else 0xFF3a3a3a.toInt())
+            btn2nd.setBackgroundColor(if (isSecondMode) 0xFF8C00 else 0xFF3a3a3a.toInt())
         }
 
         updateTrigLabels()
@@ -324,7 +646,7 @@ class MainActivity : AppCompatActivity() {
         btn2nd.setOnClickListener {
             isSecondMode = !isSecondMode
             updateTrigLabels()
-            findViewById<Button>(R.id.btn2nd)?.setBackgroundColor(if (isSecondMode) 0xFF3a3a3a.toInt() else 0xFF8C00.toInt())
+            findViewById<Button>(R.id.btn2nd)?.setBackgroundColor(if (isSecondMode) 0xFF3a3a3a.toInt() else 0xFF8C00)
             Toast.makeText(this, "2nd режим: ${if (isSecondMode) "вкл" else "выкл"}", Toast.LENGTH_SHORT).show()
         }
 
@@ -339,10 +661,7 @@ class MainActivity : AppCompatActivity() {
             applyTrigonometry(symbol) { x ->
                 when (symbol) {
                     "sin" -> sin(if (isDegMode) Math.toRadians(x) else x)
-                    "arcsin" -> {
-                        val res = asin(x)
-                        if (isDegMode) Math.toDegrees(res) else res
-                    }
+                    "arcsin" -> if (isDegMode) Math.toDegrees(asin(x)) else asin(x)
                     "sinh" -> sinh(x)
                     "arsinh" -> asinh(x)
                     else -> x
@@ -356,10 +675,7 @@ class MainActivity : AppCompatActivity() {
             applyTrigonometry(symbol) { x ->
                 when (symbol) {
                     "cos" -> cos(if (isDegMode) Math.toRadians(x) else x)
-                    "arccos" -> {
-                        val res = acos(x)
-                        if (isDegMode) Math.toDegrees(res) else res
-                    }
+                    "arccos" -> if (isDegMode) Math.toDegrees(acos(x)) else acos(x)
                     "cosh" -> cosh(x)
                     "arcosh" -> acosh(x)
                     else -> x
@@ -373,10 +689,7 @@ class MainActivity : AppCompatActivity() {
             applyTrigonometry(symbol) { x ->
                 when (symbol) {
                     "tan" -> tan(if (isDegMode) Math.toRadians(x) else x)
-                    "arctan" -> {
-                        val res = atan(x)
-                        if (isDegMode) Math.toDegrees(res) else res
-                    }
+                    "arctan" -> if (isDegMode) Math.toDegrees(atan(x)) else atan(x)
                     "tanh" -> tanh(x)
                     "artanh" -> atanh(x)
                     else -> x
@@ -389,13 +702,10 @@ class MainActivity : AppCompatActivity() {
             val symbol = btnSec.text.toString()
             applyTrigonometry(symbol) { x ->
                 when (symbol) {
-                    "sec" -> 1 / cos(if (isDegMode) Math.toRadians(x) else x)
-                    "arcsec" -> {
-                        val res = acos(1 / x)
-                        if (isDegMode) Math.toDegrees(res) else res
-                    }
-                    "sech" -> 1 / cosh(x)
-                    "arsech" -> acosh(1 / x)
+                    "sec" -> 1.0 / cos(if (isDegMode) Math.toRadians(x) else x)
+                    "arcsec" -> if (isDegMode) Math.toDegrees(acos(1.0 / x)) else acos(1.0 / x)
+                    "sech" -> 1.0 / cosh(x)
+                    "arsech" -> acosh(1.0 / x)
                     else -> x
                 }
             }
@@ -406,13 +716,10 @@ class MainActivity : AppCompatActivity() {
             val symbol = btnCsc.text.toString()
             applyTrigonometry(symbol) { x ->
                 when (symbol) {
-                    "csc" -> 1 / sin(if (isDegMode) Math.toRadians(x) else x)
-                    "arccsc" -> {
-                        val res = asin(1 / x)
-                        if (isDegMode) Math.toDegrees(res) else res
-                    }
-                    "csch" -> 1 / sinh(x)
-                    "arcsch" -> asinh(1 / x)
+                    "csc" -> 1.0 / sin(if (isDegMode) Math.toRadians(x) else x)
+                    "arccsc" -> if (isDegMode) Math.toDegrees(asin(1.0 / x)) else asin(1.0 / x)
+                    "csch" -> 1.0 / sinh(x)
+                    "arcsch" -> asinh(1.0 / x)
                     else -> x
                 }
             }
@@ -423,13 +730,10 @@ class MainActivity : AppCompatActivity() {
             val symbol = btnCot.text.toString()
             applyTrigonometry(symbol) { x ->
                 when (symbol) {
-                    "cot" -> 1 / tan(if (isDegMode) Math.toRadians(x) else x)
-                    "arccot" -> {
-                        val res = atan(1 / x)
-                        if (isDegMode) Math.toDegrees(res) else res
-                    }
-                    "coth" -> 1 / tanh(x)
-                    "arcoth" -> atanh(1 / x)
+                    "cot" -> 1.0 / tan(if (isDegMode) Math.toRadians(x) else x)
+                    "arccot" -> if (isDegMode) Math.toDegrees(atan(1.0 / x)) else atan(1.0 / x)
+                    "coth" -> 1.0 / tanh(x)
+                    "arcoth" -> atanh(1.0 / x)
                     else -> x
                 }
             }
@@ -442,15 +746,10 @@ class MainActivity : AppCompatActivity() {
     // ---------- Меню функций ----------
     private fun showFunctionMenu(anchor: View) {
         val inflater = LayoutInflater.from(this)
-        val menuView = inflater.inflate(R.layout.function_menu, null)
-        val displayMetrics = resources.displayMetrics
-        val width = (400 * displayMetrics.density).toInt()
-        val popupWindow = PopupWindow(
-            menuView,
-            width,
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            true
-        )
+        val parent = anchor.parent as? ViewGroup ?: anchor.rootView as ViewGroup
+        val menuView = inflater.inflate(R.layout.function_menu, parent, false)
+        val width = (400 * resources.displayMetrics.density).toInt()
+        val popupWindow = PopupWindow(menuView, width, ViewGroup.LayoutParams.WRAP_CONTENT, true)
         popupWindow.isOutsideTouchable = true
         popupWindow.isFocusable = true
         popupWindow.elevation = 10f
@@ -485,6 +784,9 @@ class MainActivity : AppCompatActivity() {
             currentExpression.append(randValue)
             isNewOperation = true
             isDecimalPressed = false
+            if (currentMode == CalculatorMode.PROGRAMMER) {
+                updateAllBaseDisplays(randValue.toLong())
+            }
             popupWindow.dismiss()
         }
 
@@ -503,7 +805,6 @@ class MainActivity : AppCompatActivity() {
         popupWindow.showAsDropDown(anchor, 0, 0)
     }
 
-    // Обновление текста кнопок в режиме 2nd (основной интерфейс)
     private fun updateSecondModeButtons() {
         findViewById<Button>(R.id.btnSquare)?.text = if (isSecondMode) "x³" else "x²"
         findViewById<Button>(R.id.btnLog)?.text = if (isSecondMode) "log_y" else "log"
@@ -525,6 +826,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun onNumberClick(button: Button) {
         val digit = button.text.toString()
+        if (currentMode == CalculatorMode.PROGRAMMER && !isDigitValidForBase(digit.first())) {
+            Toast.makeText(this, "Недопустимая цифра для текущей системы счисления", Toast.LENGTH_SHORT).show()
+            return
+        }
         if (isNewOperation) {
             currentExpression = StringBuilder()
             tvResult.text = ""
@@ -534,15 +839,17 @@ class MainActivity : AppCompatActivity() {
         currentExpression.append(displayDigit)
         tvResult.append(displayDigit)
         isDecimalPressed = currentExpression.contains(".")
+        if (currentMode == CalculatorMode.PROGRAMMER) {
+            updateAllBaseDisplays(currentValueLong())
+        }
     }
 
-    // ---------- Операторы + - × ÷ и = ----------
+    // ---------- Операторы ----------
     private fun setOperatorButtonListeners() {
         findViewById<Button>(R.id.btnAdd)?.setOnClickListener { appendOperator("+") }
-        findViewById<Button>(R.id.btnSubtract)?.setOnClickListener { appendMinus() } // унарный/бинарный минус
+        findViewById<Button>(R.id.btnSubtract)?.setOnClickListener { appendMinus() }
         findViewById<Button>(R.id.btnMultiply)?.setOnClickListener { appendOperator("×") }
         findViewById<Button>(R.id.btnDivide)?.setOnClickListener { appendOperator("÷") }
-
         findViewById<Button>(R.id.btnEquals)?.setOnClickListener {
             evaluateCurrentExpression()
         }
@@ -558,6 +865,9 @@ class MainActivity : AppCompatActivity() {
             addToHistory("MR →", memory)
             currentExpression.clear()
             currentExpression.append(memory)
+            if (currentMode == CalculatorMode.PROGRAMMER) {
+                updateAllBaseDisplays(memory.toLong())
+            }
         }
         findViewById<Button>(R.id.btnMPlus)?.setOnClickListener {
             memory += currentValue()
@@ -573,7 +883,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ---------- Управление (C, CE, ⌫, ±, ,) ----------
+    // ---------- Управление ----------
     private fun setControlButtonListeners() {
         findViewById<Button>(R.id.btnClear)?.setOnClickListener { onClearClick() }
         findViewById<Button>(R.id.btnCE)?.setOnClickListener { onCEClick() }
@@ -646,14 +956,35 @@ class MainActivity : AppCompatActivity() {
         isDecimalPressed = false
     }
 
+    private fun appendHexDigit(digit: Char) {
+        if (currentBase != NumberBase.HEX) {
+            Toast.makeText(this, "Доступно только в HEX режиме", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (isNewOperation) {
+            currentExpression = StringBuilder()
+            tvResult.text = ""
+            isNewOperation = false
+        }
+        currentExpression.append(digit)
+        tvResult.append(digit.toString())
+        isDecimalPressed = false
+        if (currentMode == CalculatorMode.PROGRAMMER) {
+            updateAllBaseDisplays(currentValueLong())
+        }
+    }
+
     private fun clearExpression() {
         currentExpression.clear()
         tvResult.text = ""
         isNewOperation = true
         isDecimalPressed = false
+        if (currentMode == CalculatorMode.PROGRAMMER) {
+            updateAllBaseDisplays(0L)
+        }
     }
 
-    // ---------- Вычисление выражения для бинарных операций ----------
+    // ---------- Вычисление выражения ----------
     private fun evaluateCurrentExpression() {
         var expr = currentExpression.toString()
         if (expr.isEmpty()) return
@@ -671,6 +1002,9 @@ class MainActivity : AppCompatActivity() {
             currentExpression.clear()
             currentExpression.append(result)
             isNewOperation = true
+            if (currentMode == CalculatorMode.PROGRAMMER) {
+                updateAllBaseDisplays(result.toLong())
+            }
         } catch (e: Exception) {
             tvResult.text = "Ошибка"
             e.printStackTrace()
@@ -678,7 +1012,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Парсер выражений (обратная польская нотация) – без изменений
+    // ---------- Парсер выражений (обратная польская нотация) ----------
     private fun evaluateExpression(expression: String): Double {
         val output = mutableListOf<Any>()
         val stack = Stack<Any>()
@@ -686,8 +1020,9 @@ class MainActivity : AppCompatActivity() {
         val precedence = mapOf(
             '+' to 1, '-' to 1,
             '×' to 2, '÷' to 2,
-            '^' to 3, 'm' to 3, // mod
-            'l' to 4, // log_y
+            '^' to 3,
+            '&' to 3, '|' to 2,
+            "mod" to 3, "l" to 4,
             "sin" to 5, "cos" to 5, "tan" to 5,
             "arcsin" to 5, "arccos" to 5, "arctan" to 5,
             "sinh" to 5, "cosh" to 5, "tanh" to 5,
@@ -709,7 +1044,7 @@ class MainActivity : AppCompatActivity() {
             val ch = expression[i]
 
             when {
-                ch.isDigit() || ch == '.' || (ch == '-' && (i == 0 || expression[i-1] == '(' || expression[i-1] in setOf('+','-','×','÷','^','m','l','('))) -> {
+                ch.isDigit() || ch == '.' || (ch == '-' && (i == 0 || expression[i-1] == '(' || expression[i-1] in setOf('+','-','×','÷','^','&','|','<','>','('))) -> {
                     val start = i
                     if (ch == '-') i++
                     while (i < len && (expression[i].isDigit() || expression[i] == '.')) i++
@@ -717,41 +1052,46 @@ class MainActivity : AppCompatActivity() {
                     output.add(numStr.toDouble())
                     continue
                 }
-                ch in setOf('+', '-', '×', '÷', '^', 'm', 'l') -> {
+                ch in setOf('+', '-', '×', '÷', '^', '&', '|') -> {
                     while (stack.isNotEmpty() && stack.peek() !is String && stack.peek() != '(' && precedence[stack.peek() as Char]!! >= precedence[ch]!!) {
                         output.add(stack.pop())
                     }
                     stack.push(ch)
                 }
-                ch == '(' -> {
-                    stack.push('(')
-                }
+                ch == '(' -> stack.push('(')
                 ch == ')' -> {
                     while (stack.isNotEmpty() && stack.peek() != '(') {
                         output.add(stack.pop())
                     }
-                    if (stack.isNotEmpty() && stack.peek() == '(') {
-                        stack.pop()
-                    }
-                    if (stack.isNotEmpty() && stack.peek() is String) {
-                        output.add(stack.pop())
+                    if (stack.isNotEmpty() && stack.peek() == '(') stack.pop()
+                    if (stack.isNotEmpty() && stack.peek() is String) output.add(stack.pop())
+                }
+                ch == '<' || ch == '>' -> {
+                    if (i + 1 < len && expression[i + 1] == ch) {
+                        val op = expression.substring(i, i + 2)
+                        while (stack.isNotEmpty() && stack.peek() !is String && stack.peek() != '(' && precedence[stack.peek() as Char]!! >= 3) {
+                            output.add(stack.pop())
+                        }
+                        stack.push(op)
+                        i++
                     }
                 }
                 else -> {
                     if (ch.isLetter()) {
                         val start = i
                         while (i < len && expression[i].isLetter()) i++
-                        val func = expression.substring(start, i)
-                        if (func == "π") {
-                            output.add(PI)
-                        } else if (func == "e") {
-                            output.add(E)
-                        } else {
-                            stack.push(func)
+                        when (val word = expression.substring(start, i)) {
+                            "π" -> output.add(PI)
+                            "e" -> output.add(E)
+                            "mod", "l" -> {
+                                while (stack.isNotEmpty() && stack.peek() !is String && stack.peek() != '(' && precedence[stack.peek() as Char]!! >= precedence[word]!!) {
+                                    output.add(stack.pop())
+                                }
+                                stack.push(word)
+                            }
+                            else -> stack.push(word)
                         }
                         continue
-                    } else {
-                        i++
                     }
                 }
             }
@@ -767,88 +1107,66 @@ class MainActivity : AppCompatActivity() {
             when (token) {
                 is Double -> valueStack.push(token)
                 is String -> {
-                    val arg = valueStack.pop()
-                    val result = when (token) {
-                        "sin" -> {
-                            val rad = if (isDegMode) Math.toRadians(arg) else arg
-                            sin(rad)
+                    when (token) {
+                        "<<", ">>" -> {
+                            val b = valueStack.pop().toInt()
+                            val a = valueStack.pop().toLong()
+                            val result = when (shiftMode) {
+                                ShiftMode.ARITHMETIC -> if (token == "<<") (a shl b).toDouble() else (a shr b).toDouble()
+                                ShiftMode.LOGICAL -> if (token == "<<") (a shl b).toDouble() else (a ushr b).toDouble()
+                                ShiftMode.ROTATE -> {
+                                    val bits = 64
+                                    val res = if (token == "<<") (a shl b) or (a ushr (bits - b)) else (a ushr b) or (a shl (bits - b))
+                                    maskValue(res).toDouble()
+                                }
+                                ShiftMode.ROTATE_CARRY -> {
+                                    val bits = 64
+                                    val res = if (token == "<<") (a shl b) or (a ushr (bits - b)) else (a ushr b) or (a shl (bits - b))
+                                    maskValue(res).toDouble()
+                                }
+                            }
+                            valueStack.push(result)
                         }
-                        "cos" -> {
-                            val rad = if (isDegMode) Math.toRadians(arg) else arg
-                            cos(rad)
+                        "mod", "l" -> {
+                            val b = valueStack.pop()
+                            val a = valueStack.pop()
+                            val result = when (token) {
+                                "mod" -> a % b
+                                "l" -> ln(b) / ln(a)
+                                else -> throw IllegalArgumentException()
+                            }
+                            valueStack.push(result)
                         }
-                        "tan" -> {
-                            val rad = if (isDegMode) Math.toRadians(arg) else arg
-                            tan(rad)
+                        else -> {
+                            val arg = valueStack.pop()
+                            val result = when (token) {
+                                "sin" -> sin(if (isDegMode) Math.toRadians(arg) else arg)
+                                "cos" -> cos(if (isDegMode) Math.toRadians(arg) else arg)
+                                "tan" -> tan(if (isDegMode) Math.toRadians(arg) else arg)
+                                "arcsin" -> if (isDegMode) Math.toDegrees(asin(arg)) else asin(arg)
+                                "arccos" -> if (isDegMode) Math.toDegrees(acos(arg)) else acos(arg)
+                                "arctan" -> if (isDegMode) Math.toDegrees(atan(arg)) else atan(arg)
+                                "sinh" -> sinh(arg); "cosh" -> cosh(arg); "tanh" -> tanh(arg)
+                                "arsinh" -> asinh(arg); "arcosh" -> acosh(arg); "artanh" -> atanh(arg)
+                                "sec" -> 1.0 / cos(if (isDegMode) Math.toRadians(arg) else arg)
+                                "csc" -> 1.0 / sin(if (isDegMode) Math.toRadians(arg) else arg)
+                                "cot" -> 1.0 / tan(if (isDegMode) Math.toRadians(arg) else arg)
+                                "arcsec" -> if (isDegMode) Math.toDegrees(acos(1.0 / arg)) else acos(1.0 / arg)
+                                "arccsc" -> if (isDegMode) Math.toDegrees(asin(1.0 / arg)) else asin(1.0 / arg)
+                                "arccot" -> if (isDegMode) Math.toDegrees(atan(1.0 / arg)) else atan(1.0 / arg)
+                                "sech" -> 1.0 / cosh(arg); "csch" -> 1.0 / sinh(arg); "coth" -> 1.0 / tanh(arg)
+                                "arsech" -> acosh(1.0 / arg); "arcsch" -> asinh(1.0 / arg); "arcoth" -> atanh(1.0 / arg)
+                                "ln" -> ln(arg); "log" -> log10(arg); "exp" -> exp(arg)
+                                "sqrt" -> sqrt(arg); "cbrt" -> cbrt(arg); "abs" -> abs(arg)
+                                "floor" -> floor(arg); "ceil" -> ceil(arg)
+                                "n!" -> { var f = 1.0; for (j in 1..arg.toInt()) f *= j; f }
+                                "x²" -> arg * arg; "x³" -> arg * arg * arg
+                                "%" -> arg / 100.0; "±" -> -arg
+                                else -> throw IllegalArgumentException("Неизвестная функция: $token")
+                            }
+                            valueStack.push(result)
                         }
-                        "arcsin" -> {
-                            val res = asin(arg)
-                            if (isDegMode) Math.toDegrees(res) else res
-                        }
-                        "arccos" -> {
-                            val res = acos(arg)
-                            if (isDegMode) Math.toDegrees(res) else res
-                        }
-                        "arctan" -> {
-                            val res = atan(arg)
-                            if (isDegMode) Math.toDegrees(res) else res
-                        }
-                        "sinh" -> sinh(arg)
-                        "cosh" -> cosh(arg)
-                        "tanh" -> tanh(arg)
-                        "arsinh" -> asinh(arg)
-                        "arcosh" -> acosh(arg)
-                        "artanh" -> atanh(arg)
-                        "sec" -> {
-                            val rad = if (isDegMode) Math.toRadians(arg) else arg
-                            1 / cos(rad)
-                        }
-                        "csc" -> {
-                            val rad = if (isDegMode) Math.toRadians(arg) else arg
-                            1 / sin(rad)
-                        }
-                        "cot" -> {
-                            val rad = if (isDegMode) Math.toRadians(arg) else arg
-                            1 / tan(rad)
-                        }
-                        "arcsec" -> {
-                            val res = acos(1 / arg)
-                            if (isDegMode) Math.toDegrees(res) else res
-                        }
-                        "arccsc" -> {
-                            val res = asin(1 / arg)
-                            if (isDegMode) Math.toDegrees(res) else res
-                        }
-                        "arccot" -> {
-                            val res = atan(1 / arg)
-                            if (isDegMode) Math.toDegrees(res) else res
-                        }
-                        "sech" -> 1 / cosh(arg)
-                        "csch" -> 1 / sinh(arg)
-                        "coth" -> 1 / tanh(arg)
-                        "arsech" -> acosh(1 / arg)
-                        "arcsch" -> asinh(1 / arg)
-                        "arcoth" -> atanh(1 / arg)
-                        "ln" -> ln(arg)
-                        "log" -> log10(arg)
-                        "exp" -> exp(arg)
-                        "sqrt" -> sqrt(arg)
-                        "cbrt" -> cbrt(arg)
-                        "abs" -> abs(arg)
-                        "floor" -> floor(arg)
-                        "ceil" -> ceil(arg)
-                        "n!" -> {
-                            var fact = 1.0
-                            for (j in 1..arg.toInt()) fact *= j
-                            fact
-                        }
-                        "x²" -> arg * arg
-                        "x³" -> arg * arg * arg
-                        "%" -> arg / 100.0
-                        "±" -> -arg
-                        else -> throw IllegalArgumentException("Неизвестная функция: $token")
                     }
-                    valueStack.push(result)
                 }
                 is Char -> {
                     val b = valueStack.pop()
@@ -859,8 +1177,8 @@ class MainActivity : AppCompatActivity() {
                         '×' -> a * b
                         '÷' -> a / b
                         '^' -> a.pow(b)
-                        'm' -> a % b
-                        'l' -> ln(b) / ln(a) // log_y
+                        '&' -> (a.toLong() and b.toLong()).toDouble()
+                        '|' -> (a.toLong() or b.toLong()).toDouble()
                         else -> throw IllegalArgumentException("Неизвестный оператор: $token")
                     }
                     valueStack.push(result)
@@ -884,19 +1202,53 @@ class MainActivity : AppCompatActivity() {
         }
         isNewOperation = true
         isDecimalPressed = false
+        if (currentMode == CalculatorMode.PROGRAMMER) {
+            updateAllBaseDisplays(result.toLong())
+        }
     }
 
     private fun applyTrigonometry(symbol: String, operation: (Double) -> Double) {
         applyUnaryOperation(symbol, operation)
     }
 
-    // ---------- Остальные методы ----------
+    // ---------- Вспомогательные методы для чисел ----------
     private fun currentValue(): Double {
         return tvResult.text.toString().toDoubleOrNull() ?: 0.0
     }
 
+    private fun currentValueLong(): Long {
+        val raw = try {
+            when (currentBase) {
+                NumberBase.HEX -> tvResult.text.toString().toLong(16)
+                NumberBase.DEC -> tvResult.text.toString().toLong()
+                NumberBase.OCT -> tvResult.text.toString().toLong(8)
+                NumberBase.BIN -> tvResult.text.toString().toLong(2)
+            }
+        } catch (e: NumberFormatException) {
+            0L
+        }
+        return maskValue(raw)
+    }
+
+    private fun updateAllBaseDisplays(value: Long) {
+        tvHexValue.text = value.toString(16).uppercase()
+        tvDecValue.text = value.toString()
+        tvOctValue.text = value.toString(8)
+        tvBinValue.text = value.toString(2)
+        updateBitButtons()
+    }
+
+    private fun updateDisplayAndAllBases(value: Long) {
+        tvResult.text = when (currentBase) {
+            NumberBase.HEX -> value.toString(16).uppercase()
+            NumberBase.DEC -> value.toString()
+            NumberBase.OCT -> value.toString(8)
+            NumberBase.BIN -> value.toString(2)
+        }
+        updateAllBaseDisplays(value)
+    }
+
     private fun formatNumber(value: Double): String {
-        // TODO: учесть isFEMode для экспоненциального формата
         return if (value == value.toLong().toDouble()) {
             value.toLong().toString()
         } else {
@@ -904,6 +1256,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun isDigitValidForBase(digit: Char): Boolean {
+        return when (currentBase) {
+            NumberBase.HEX -> digit in '0'..'9' || digit in 'A'..'F' || digit in 'a'..'f'
+            NumberBase.DEC -> digit in '0'..'9'
+            NumberBase.OCT -> digit in '0'..'7'
+            NumberBase.BIN -> digit in '0'..'1'
+        }
+    }
+
+    // ---------- Обработчики управления ----------
     private fun onClearClick() {
         clearExpression()
     }
@@ -928,6 +1290,9 @@ class MainActivity : AppCompatActivity() {
                 tvResult.text = ""
                 isNewOperation = true
                 isDecimalPressed = false
+                if (currentMode == CalculatorMode.PROGRAMMER) {
+                    updateAllBaseDisplays(0L)
+                }
                 return
             }
         } else {
@@ -935,6 +1300,9 @@ class MainActivity : AppCompatActivity() {
         }
         tvResult.text = currentExpression.toString()
         isDecimalPressed = currentExpression.contains(".")
+        if (currentMode == CalculatorMode.PROGRAMMER) {
+            updateAllBaseDisplays(currentValueLong())
+        }
     }
 
     private fun onDotClick() {
@@ -948,5 +1316,8 @@ class MainActivity : AppCompatActivity() {
             tvResult.append(".")
         }
         isDecimalPressed = true
+        if (currentMode == CalculatorMode.PROGRAMMER) {
+            updateAllBaseDisplays(currentValueLong())
+        }
     }
 }

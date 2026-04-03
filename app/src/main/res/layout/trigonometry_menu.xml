@@ -3,7 +3,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="#2a2a2a"
+    android:background="@color/gray_dark"
     android:padding="4dp">
 
     <!-- Первый ряд: 2nd, sin, cos, tan -->
@@ -19,11 +19,10 @@
             android:layout_weight="1"
             android:layout_margin="2dp"
             android:text="2nd"
-            android:textColor="#ffffff"
-            android:background="#000000"
+            android:textColor="@color/white"
+            android:background="@color/primary"
             android:textSize="14sp"
             android:minWidth="80dp"
-            android:padding="4dp"
             android:gravity="center" />
 
         <Button
@@ -33,11 +32,10 @@
             android:layout_weight="1"
             android:layout_margin="2dp"
             android:text="sin"
-            android:textColor="#ffffff"
-            android:background="#000000"
+            android:textColor="@color/white"
+            android:background="@color/primary"
             android:textSize="14sp"
             android:minWidth="80dp"
-            android:padding="4dp"
             android:gravity="center" />
 
         <Button
@@ -47,11 +45,10 @@
             android:layout_weight="1"
             android:layout_margin="2dp"
             android:text="cos"
-            android:textColor="#ffffff"
-            android:background="#000000"
+            android:textColor="@color/white"
+            android:background="@color/primary"
             android:textSize="14sp"
             android:minWidth="80dp"
-            android:padding="4dp"
             android:gravity="center" />
 
         <Button
@@ -61,11 +58,10 @@
             android:layout_weight="1"
             android:layout_margin="2dp"
             android:text="tan"
-            android:textColor="#ffffff"
-            android:background="#000000"
+            android:textColor="@color/white"
+            android:background="@color/primary"
             android:textSize="14sp"
             android:minWidth="80dp"
-            android:padding="4dp"
             android:gravity="center" />
     </LinearLayout>
 
@@ -82,11 +78,10 @@
             android:layout_weight="1"
             android:layout_margin="2dp"
             android:text="hyp"
-            android:textColor="#ffffff"
-            android:background="#3a3a3a"
+            android:textColor="@color/white"
+            android:background="@color/gray_700"
             android:textSize="14sp"
             android:minWidth="80dp"
-            android:padding="4dp"
             android:gravity="center" />
 
         <Button
@@ -96,11 +91,10 @@
             android:layout_weight="1"
             android:layout_margin="2dp"
             android:text="sec"
-            android:textColor="#ffffff"
-            android:background="#000000"
+            android:textColor="@color/white"
+            android:background="@color/primary"
             android:textSize="14sp"
             android:minWidth="80dp"
-            android:padding="4dp"
             android:gravity="center" />
 
         <Button
@@ -110,11 +104,10 @@
             android:layout_weight="1"
             android:layout_margin="2dp"
             android:text="csc"
-            android:textColor="#ffffff"
-            android:background="#000000"
+            android:textColor="@color/white"
+            android:background="@color/primary"
             android:textSize="14sp"
             android:minWidth="80dp"
-            android:padding="4dp"
             android:gravity="center" />
 
         <Button
@@ -124,11 +117,11 @@
             android:layout_weight="1"
             android:layout_margin="2dp"
             android:text="cot"
-            android:textColor="#ffffff"
-            android:background="#000000"
+            android:textColor="@color/white"
+            android:background="@color/primary"
             android:textSize="14sp"
             android:minWidth="80dp"
-            android:padding="4dp"
             android:gravity="center" />
     </LinearLayout>
+
 </LinearLayout>

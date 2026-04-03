@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/radioGroupShiftMode"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#2a2a2a"
+    android:padding="8dp">
+
+    <RadioButton
+        android:id="@+id/radioArithShift"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/arithmetic_shift"
+        android:textColor="#ffffff"
+        android:buttonTint="#FF8C00" />
+
+    <RadioButton
+        android:id="@+id/radioLogicalShift"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/logical_shift"
+        android:textColor="#ffffff"
+        android:buttonTint="#FF8C00" />
+
+    <RadioButton
+        android:id="@+id/radioRotateShift"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/rotate_circular"
+        android:textColor="#ffffff"
+        android:buttonTint="#FF8C00" />
+
+    <RadioButton
+        android:id="@+id/radioRotateCarryShift"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/rotate_carry"
+        android:textColor="#ffffff"
+        android:buttonTint="#FF8C00" />
+
+</RadioGroup>

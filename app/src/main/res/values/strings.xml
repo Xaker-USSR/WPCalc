@@ -1,27 +1,82 @@
 <resources>
-    <string name="app_name">Calculator WP10</string>
+    <string name="app_name">WP10 Calculator</string>
 
-    <string-array name="converter_categories">
-        <item>Length</item>
-        <item>Weight</item>
-        <item>Temperature</item>
-    </string-array>
+    <!-- Modes -->
+    <string name="mode_standard">Standard</string>
+    <string name="mode_scientific">Scientific</string>
+    <string name="mode_programmer">Programmer</string>
 
-    <string-array name="length_units">
-        <item>Meters</item>
-        <item>Kilometers</item>
-        <item>Miles</item>
-    </string-array>
+    <!-- Number bases -->
+    <string name="btn_hex">HEX</string>
+    <string name="btn_dec">DEC</string>
+    <string name="btn_oct">OCT</string>
+    <string name="btn_bin">BIN</string>
 
-    <string-array name="weight_units">
-        <item>Kilograms</item>
-        <item>Grams</item>
-        <item>Pounds</item>
-    </string-array>
+    <!-- Digits and letters -->
+    <string name="btn_a">A</string>
+    <string name="btn_b">B</string>
+    <string name="btn_c">C</string>
+    <string name="btn_d">D</string>
+    <string name="btn_e">E</string>
+    <string name="btn_f">F</string>
+    <string name="btn_0">0</string>
+    <string name="btn_1">1</string>
+    <string name="btn_2">2</string>
+    <string name="btn_3">3</string>
+    <string name="btn_4">4</string>
+    <string name="btn_5">5</string>
+    <string name="btn_6">6</string>
+    <string name="btn_7">7</string>
+    <string name="btn_8">8</string>
+    <string name="btn_9">9</string>
+    <string name="btn_dot">,</string>
+    <string name="btn_sign">±</string>
 
-    <string-array name="temperature_units">
-        <item>Celsius</item>
-        <item>Fahrenheit</item>
-        <item>Kelvin</item>
-    </string-array>
+    <!-- Operators -->
+    <string name="btn_add">+</string>
+    <string name="btn_subtract">–</string>
+    <string name="btn_multiply">×</string>
+    <string name="btn_divide">÷</string>
+    <string name="btn_percent">%</string>
+    <string name="btn_equals">=</string>
+    <string name="btn_clear">C</string>
+    <string name="btn_ce">CE</string>
+    <string name="btn_backspace">⌫</string>
+    <string name="btn_left_paren">(</string>
+    <string name="btn_right_paren">)</string>
+    <string name="btn_shift_left">&lt;&lt;</string>
+    <string name="btn_shift_right">&gt;&gt;</string>
+
+    <!-- Memory -->
+    <string name="btn_mc">MC</string>
+    <string name="btn_mr">MR</string>
+    <string name="btn_mplus">M+</string>
+    <string name="btn_mminus">M-</string>
+    <string name="btn_ms">MS</string>
+    <string name="btn_triangle">▼</string>
+    <string name="btn_qword">QWORD</string>
+
+    <!-- Bitwise / Bit Shift -->
+    <string name="btn_bitwise">Bitwise ▼</string>
+    <string name="btn_bit_shift">Bit Shift ▼</string>
+    <string name="arithmetic_shift">Arithmetic shift</string>
+    <string name="logical_shift">Logical shift</string>
+    <string name="rotate_circular">Rotate circular shift</string>
+    <string name="rotate_carry">Rotate through carry</string>
+
+    <!-- About -->
+    <string name="about_title">WP10 Calculator</string>
+    <string name="about_version">Version 1.0</string>
+    <string name="about_description">Windows Phone 10 style calculator for Android</string>
+    <string name="about_features"><![CDATA[\nFeatures:\n• Standard and scientific modes\n• Trigonometric and hyperbolic functions\n• Logarithms and powers\n• Memory and calculation history\n• Fully customizable interface]]></string>
+    <string name="about_credits"><![CDATA[\nDeveloped with Kotlin and AndroidX Xaker_USSR for S-10X]]></string>
+
+    <!-- Scientific mode buttons -->
+    <string name="btn_trigonometry">Trigonometry ▼</string>
+    <string name="btn_function">f Function ▼</string>
+
+    <!-- Content descriptions -->
+    <string name="desc_menu">Menu</string>
+    <string name="desc_history">History</string>
+    <string name="desc_icon">App icon</string>
 </resources>
