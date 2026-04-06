@@ -66,7 +66,7 @@
 
     <!-- About -->
     <string name="about_title">WP10 Calculator</string>
-    <string name="about_version">Version 1.0</string>
+    <string name="about_version">Version 1.1</string>
     <string name="about_description">Windows Phone 10 style calculator for Android</string>
     <string name="about_features"><![CDATA[\nFeatures:\n• Standard and scientific modes\n• Trigonometric and hyperbolic functions\n• Logarithms and powers\n• Memory and calculation history\n• Fully customizable interface]]></string>
     <string name="about_credits"><![CDATA[\nDeveloped with Kotlin and AndroidX Xaker_USSR for S-10X]]></string>

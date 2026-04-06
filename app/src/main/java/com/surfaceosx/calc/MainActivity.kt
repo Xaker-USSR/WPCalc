@@ -45,6 +45,10 @@ class MainActivity : AppCompatActivity() {
     private var isDegMode = true
     private var isFEMode = false
 
+    private var operand1: Double = 0.0
+    private var operand2: Double = 0.0
+    private var operator: String = ""
+
     // Для режима программиста
     private var currentBase = NumberBase.DEC
     private var currentWordSize = WordSize.QWORD
@@ -402,7 +406,7 @@ class MainActivity : AppCompatActivity() {
                         1f
                     )
                     text = "0"
-                    textSize = 16f
+                    textSize = 12f   // уменьшен размер шрифта
                     setBackgroundColor(0xFF3a3a3a.toInt())
                     setTextColor(android.graphics.Color.WHITE)
                     setOnClickListener { onBitClick(bitIndex) }
@@ -413,7 +417,7 @@ class MainActivity : AppCompatActivity() {
                         LinearLayout.LayoutParams.WRAP_CONTENT
                     )
                     text = bitIndex.toString()
-                    textSize = 10f
+                    textSize = 8f    // уменьшен размер шрифта
                     gravity = android.view.Gravity.CENTER
                     setTextColor(android.graphics.Color.LTGRAY)
                 }
@@ -932,6 +936,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun appendOperator(op: String) {
+        if (isNewOperation && currentExpression.isNotEmpty()) {
+            // Если после вычисления результата нажат оператор, начинаем новое выражение
+            val lastResult = currentExpression.toString()
+            currentExpression.clear()
+            currentExpression.append(lastResult)
+            isNewOperation = false
+        }
         appendToExpression(op)
     }
 
@@ -946,6 +957,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun appendMinus() {
+        if (isNewOperation && currentExpression.isNotEmpty()) {
+            // Если после вычисления результата нажат минус, начинаем новое выражение
+            val lastResult = currentExpression.toString()
+            currentExpression.clear()
+            currentExpression.append(lastResult)
+            isNewOperation = false
+        }
         if (isNewOperation) {
             currentExpression = StringBuilder()
             tvResult.text = ""
@@ -999,12 +1017,12 @@ class MainActivity : AppCompatActivity() {
             val result = evaluateExpression(expr)
             tvResult.text = formatNumber(result)
             addToHistory(expr, result)
+            // Сохраняем результат как текущее выражение
             currentExpression.clear()
             currentExpression.append(result)
+            operand1 = result
+            operator = ""
             isNewOperation = true
-            if (currentMode == CalculatorMode.PROGRAMMER) {
-                updateAllBaseDisplays(result.toLong())
-            }
         } catch (e: Exception) {
             tvResult.text = "Ошибка"
             e.printStackTrace()

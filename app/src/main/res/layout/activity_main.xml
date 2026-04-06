@@ -50,18 +50,24 @@
                 android:contentDescription="@string/desc_history" />
         </LinearLayout>
 
-        <!-- Дисплей результата -->
-        <TextView
-            android:id="@+id/tvResult"
+        <!-- Дисплей результата с горизонтальной прокруткой -->
+        <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1.5"
-            android:gravity="end|bottom"
-            android:padding="16dp"
-            android:text="@string/btn_0"
-            android:textColor="@color/white"
-            android:textSize="48sp"
-            android:textStyle="bold" />
+            android:scrollbars="horizontal">
+
+            <TextView
+                android:id="@+id/tvResult"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="end|bottom"
+                android:padding="16dp"
+                android:text="@string/btn_0"
+                android:textColor="#ffffff"
+                android:textSize="48sp"
+                android:textStyle="bold" />
+        </HorizontalScrollView>
 
         <!-- Строка памяти (6 кнопок) -->
         <LinearLayout

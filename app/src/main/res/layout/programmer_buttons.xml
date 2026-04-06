@@ -1,130 +1,152 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:fillViewport="true">
 
-    <!-- Панель выбора системы счисления -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:background="#1a1a1a">
+        android:orientation="vertical">
 
-        <RadioGroup
-            android:id="@+id/radioGroupBase"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <RadioButton
-                android:id="@+id/radioHex"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:text="HEX"
-                android:textColor="#ffffff"
-                android:buttonTint="#FF8C00"
-                android:gravity="center_vertical" />
-
-            <RadioButton
-                android:id="@+id/radioDec"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:text="DEC"
-                android:textColor="#ffffff"
-                android:buttonTint="#FF8C00"
-                android:checked="true"
-                android:gravity="center_vertical" />
-
-            <RadioButton
-                android:id="@+id/radioOct"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:text="OCT"
-                android:textColor="#ffffff"
-                android:buttonTint="#FF8C00"
-                android:gravity="center_vertical" />
-
-            <RadioButton
-                android:id="@+id/radioBin"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:text="BIN"
-                android:textColor="#ffffff"
-                android:buttonTint="#FF8C00"
-                android:gravity="center_vertical" />
-        </RadioGroup>
-
+        <!-- Панель выбора системы счисления: радиокнопки и числа в одной строке -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="end">
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:background="#1a1a1a"
+            android:baselineAligned="false">
 
-            <TextView
-                android:id="@+id/tvHexValue"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:gravity="center_vertical|end"
-                android:text="0"
-                android:textColor="#ffffff"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:paddingEnd="8dp" />
+            <!-- Радиокнопки (вертикально) -->
+            <RadioGroup
+                android:id="@+id/radioGroupBase"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tvDecValue"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:gravity="center_vertical|end"
-                android:text="0"
-                android:textColor="#ffffff"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:paddingEnd="8dp" />
+                <RadioButton
+                    android:id="@+id/radioHex"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="HEX"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#FF8C00"
+                    android:gravity="center_vertical" />
 
-            <TextView
-                android:id="@+id/tvOctValue"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:gravity="center_vertical|end"
-                android:text="0"
-                android:textColor="#ffffff"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:paddingEnd="8dp" />
+                <RadioButton
+                    android:id="@+id/radioDec"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="DEC"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#FF8C00"
+                    android:checked="true"
+                    android:gravity="center_vertical" />
 
-            <TextView
-                android:id="@+id/tvBinValue"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:gravity="center_vertical|end"
-                android:text="0"
-                android:textColor="#ffffff"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:paddingEnd="8dp" />
+                <RadioButton
+                    android:id="@+id/radioOct"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="OCT"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#FF8C00"
+                    android:gravity="center_vertical" />
+
+                <RadioButton
+                    android:id="@+id/radioBin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="BIN"
+                    android:textColor="#ffffff"
+                    android:buttonTint="#FF8C00"
+                    android:gravity="center_vertical" />
+            </RadioGroup>
+
+            <!-- Числа в системах счисления (вертикально, с прокруткой) -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="end"
+                android:layout_marginStart="16dp">
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="32dp"
+                    android:scrollbars="horizontal">
+
+                    <TextView
+                        android:id="@+id/tvHexValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical|end"
+                        android:text="0"
+                        android:textColor="#ffffff"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:paddingEnd="8dp" />
+                </HorizontalScrollView>
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="32dp"
+                    android:scrollbars="horizontal">
+
+                    <TextView
+                        android:id="@+id/tvDecValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical|end"
+                        android:text="0"
+                        android:textColor="#ffffff"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:paddingEnd="8dp" />
+                </HorizontalScrollView>
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="32dp"
+                    android:scrollbars="horizontal">
+
+                    <TextView
+                        android:id="@+id/tvOctValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical|end"
+                        android:text="0"
+                        android:textColor="#ffffff"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:paddingEnd="8dp" />
+                </HorizontalScrollView>
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="32dp"
+                    android:scrollbars="horizontal">
+
+                    <TextView
+                        android:id="@+id/tvBinValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical|end"
+                        android:text="0"
+                        android:textColor="#ffffff"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:paddingEnd="8dp" />
+                </HorizontalScrollView>
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
 
-    <!-- Разделитель -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#3a3a3a" />
-
-    <!-- Панель переключателей и дополнительных кнопок -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="4dp"
-        android:background="#1a1a1a"
-        android:gravity="center_vertical"
-        android:baselineAligned="false">
+        <!-- Разделитель -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#3a3a3a" />
 
         <!-- Панель переключателей и дополнительных кнопок -->
         <LinearLayout
@@ -133,7 +155,8 @@
             android:orientation="horizontal"
             android:padding="4dp"
             android:background="#1a1a1a"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:baselineAligned="false">
 
             <!-- Переключатели режимов ввода -->
             <LinearLayout
@@ -197,62 +220,60 @@
                     android:layout_margin="2dp" />
             </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
 
-    <!-- Bitwise и Bit Shift -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="4dp"
-        android:background="#1a1a1a">
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnBitwise"
-            style="@style/WP10TopButton"
-            android:text="@string/btn_bitwise"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:layout_margin="2dp" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnBitShift"
-            style="@style/WP10TopButton"
-            android:text="@string/btn_bit_shift"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:layout_margin="2dp" />
-    </LinearLayout>
-
-    <!-- Разделитель -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#3a3a3a" />
-
-    <!-- Контейнер для клавиатур -->
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="8">
-
-        <!-- Стандартная клавиатура (из отдельного файла) -->
-        <include
-            android:id="@+id/standardKeyboard"
-            layout="@layout/standard_keyboard"
+        <!-- Bitwise и Bit Shift -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="4dp"
+            android:background="#1a1a1a">
 
-        <!-- Битовая клавиатура (из отдельного файла) -->
-        <include
-            android:id="@+id/bitKeyboard"
-            layout="@layout/bit_keyboard"
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnBitwise"
+                style="@style/WP10TopButton"
+                android:text="@string/btn_bitwise"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_margin="2dp" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnBitShift"
+                style="@style/WP10TopButton"
+                android:text="@string/btn_bit_shift"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_margin="2dp" />
+        </LinearLayout>
+
+        <!-- Разделитель -->
+        <View
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
+            android:layout_height="1dp"
+            android:background="#3a3a3a" />
 
-    </FrameLayout>
+        <!-- Контейнер для клавиатур -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="8">
 
-</LinearLayout>
+            <include
+                android:id="@+id/standardKeyboard"
+                layout="@layout/standard_keyboard"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <include
+                android:id="@+id/bitKeyboard"
+                layout="@layout/bit_keyboard"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
+        </FrameLayout>
+
+    </LinearLayout>
+</ScrollView>
